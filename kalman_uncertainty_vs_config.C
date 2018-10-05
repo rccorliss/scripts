@@ -13,7 +13,8 @@
 #include "TFile.h"
 
 void kalman_uncertainty_vs_config() {
-  // don't need to do this just to read basic structures:  gSystem->Load("libg4hough.so");
+  //rcc says: don't need to do this just to read basic structures:  gSystem->Load("libg4hough.so");
+  //rcc says: coding conventions usually say 'h' stands for a histogram and 'c' for a canvas, 'f' for a function.  maybe 'g' for a graph?  I don't use them often enough.  To me 'g' sounds like a constant, like 'k'.
 
 	// define constants
 	const int n_layouts = 6;				// number of INTT layouts we are testing
@@ -38,19 +39,23 @@ void kalman_uncertainty_vs_config() {
 	TH1F *hSigmaZ[n_layouts];
 	TH1F *hSigmaPHI[n_layouts];
 	TH1F *hSigmaR[n_layouts];
+	TH2F *hSigmaPhiSigmaZ[n_layouts];
 	
 	for (int i = 0; i < n_layouts; ++i) {
-		hSigmaZ[i] = new TH1F(("sigmaZ" + layout[i]).c_str(),layout[i].c_str(),100,-10,500);
-		hSigmaZ[i]->SetMaximum(60);
+	  hSigmaZ[i] = new TH1F(("sigmaZ" + layout[i]).c_str(),(layout[i]+";#sigma_Z (um)").c_str(),100,-10,800);
+		//hSigmaZ[i]->SetMaximum(60);
 		hSigmaZ[i]->SetLineColor(i+1);
 
-		hSigmaPHI[i] = new TH1F(("sigmaPHI" + layout[i]).c_str(),layout[i].c_str(),100,-10,500);
-		hSigmaPHI[i]->SetMaximum(300);
+		hSigmaPHI[i] = new TH1F(("sigmaPHI" + layout[i]).c_str(),(layout[i]+";#sigma_#phi (um)").c_str(),100,-10,600);
+		//hSigmaPHI[i]->SetMaximum(300);
 		hSigmaPHI[i]->SetLineColor(i+1);
 
-		hSigmaR[i] = new TH1F(("sigmaR" + layout[i]).c_str(),layout[i].c_str(),100,-10,500);
-		hSigmaR[i]->SetMaximum(200);
+		hSigmaR[i] = new TH1F(("sigmaR" + layout[i]).c_str(),(layout[i]+";#sigma_R (um)").c_str(),100,-10,100);
+		//hSigmaR[i]->SetMaximum(200); setting the limits in the definition above fixes them anyway.
 		hSigmaR[i]->SetLineColor(i+1);
+
+		hSigmaPhiSigmaZ[i] = new TH2F(("sigmaPhiSigmaZ" + layout[i]).c_str(),(layout[i]+";#sigma_Z (um);#sigma_#phi (um)").c_str(),50,-10,800,50,-10,600);
+		//hSigmPhiSigmaZa[i]->SetLineColor(i+1);
 	}
 
 	// fill histograms
@@ -70,11 +75,21 @@ void kalman_uncertainty_vs_config() {
 			  hSigmaZ[j]->Fill(TMath::Sqrt(sigma_z)*1e4);
 			  hSigmaPHI[j]->Fill(TMath::Sqrt(sigma_phi)*1e4);
 			  hSigmaR[j]->Fill(TMath::Sqrt(sigma_r)*1e4);
+			  hSigmaPhiSigmaZ[j]->Fill(TMath::Sqrt(sigma_z)*1e4,TMath::Sqrt(sigma_phi)*1e4);//2D histogram
 			  //}
 		}
 	}
+
+	//create a canvas to draw all the 2D plots:
+	TCanvas *c0=new TCanvas("c0","c0",800,600);
+	c0->Divide(3,2);
+	for (int i=0;i<n_layouts;i++){
+	  c0->cd(i+1);
+	  hSigmaPhiSigmaZ[i]->Draw("colz");
+	}
+	c0->SaveAs("SigmaPhi_vs_SigmaZ_multi.pdf");
 	// create canvas and legend
-	TCanvas *h = new TCanvas("c1","c1",700,500);
+	TCanvas *c = new TCanvas("c1","c1",700,500);
 	TLegend *legend;
 
 	// draw and format Z histogram
@@ -90,7 +105,7 @@ void kalman_uncertainty_vs_config() {
 	}
 
 	legend->Draw();
-	h->SaveAs("SigmaZ_vs_config.png");
+	c->SaveAs("SigmaZ_vs_config.png");
 	delete legend;
 
 	// draw and format PHI histogram
@@ -107,7 +122,7 @@ void kalman_uncertainty_vs_config() {
 	}
 
 	legend->Draw();
-	h->SaveAs("SigmaPHI_vs_config.png");
+	c->SaveAs("SigmaPHI_vs_config.png");
 	delete legend;
 
 	// draw and format R histogram
@@ -124,23 +139,55 @@ void kalman_uncertainty_vs_config() {
 	}
 
 	legend->Draw();
-	h->SaveAs("SigmaR_vs_config.png");
+	c->SaveAs("SigmaR_vs_config.png");
 	delete legend;
 
 	// plot RMS and error for Z
 	double x[n_layouts], y[n_layouts], ex[n_layouts], ey[n_layouts];
 
 	for (int i = 0; i < n_layouts; ++i) {
-		x[i] = hSigmaZ[i]->GetRMS();
-		ex[i] = hSigmaZ[i]->GetRMSError();
+		x[i] = hSigmaZ[i]->GetMean();
+		ex[i] = hSigmaZ[i]->GetMeanError();
 		y[i] = i;
 		ey[i] = 0;
 	}
-	h->Clear();
-	TGraphErrors *hRMSZ = new TGraphErrors(n_layouts,x,y,ex,ey);
-	hRMSZ->Draw();
-	h->SaveAs("ZRMS_vs_config.png");
+	c->Clear();
+	//you can also do this with a histogram.  Make one bin per layout, and use a fill that also takes an error value (or setbincontent, setbinerror):
 
+
+	// a short routine to compile a set of means from an array of histograms:
+	TH1F *hRMSZ=new TH1F("hMean","Mean values of #sigma_z;layout;Mean (um)",n_layouts,-0.5,n_layouts-0.5);//I do the -0.5 to make sure the integers are centered in the bins.  Mostly a style thing.
+	TH1F **histarray=hSigmaZ;
+	TH1F *histout=hRMSZ;
+	histout->SetCanExtend(TH1::kAllAxes); //lets us keep adding bins even if we go over the number we defined.
+	//histout->SetLine
+	//	histout->SetOptStat(0);
+	for (int i=0;i<n_layouts;i++){
+	  int bin=histout->Fill(layout[i].c_str(),histarray[i]->GetMean());
+	  histout->SetBinError(bin,histarray[i]->GetMeanError());
+	}
+	histout->Draw();
+	c->SaveAs("ZRMS_vs_config.png");
+
+
+	TH1F *hRMSPhi=new TH1F("hMeanPhi","Mean values of #sigma_#phi;layout;Mean (um)",n_layouts,-0.5,n_layouts-0.5);//I do the -0.5 to make sure the integers are centered in the bins.  Mostly a style thing.
+	histarray=hSigmaPHI;
+        histout=hRMSPhi;
+	histout->SetCanExtend(TH1::kAllAxes); //lets us keep adding bins even if we go over the number we defined.
+	//histout->SetLine
+	//histout->SetOptStat(0);
+	for (int i=0;i<n_layouts;i++){
+	  int bin=histout->Fill(layout[i].c_str(),histarray[i]->GetMean());
+	  histout->SetBinError(bin,histarray[i]->GetMeanError());
+	}
+	histout->Draw();
+	c->SaveAs("PhiRMS_vs_config.png");
+
+	
+	TGraphErrors *gRMSZ = new TGraphErrors(n_layouts,x,y,ex,ey);
+	
+	hRMSZ->Draw();
+	c->SaveAs("ZRMS_vs_config.png");
 	for (int i = 0; i < n_layouts; ++i) {
 		cout << layout[i] << "\t" << hSigmaZ[i]->GetRMS() << "\t" << hSigmaZ[i]->GetRMSError() << endl;
 	}
@@ -153,23 +200,29 @@ void kalman_uncertainty_vs_config() {
 
 	// prove INTT layout by plotting error in Z versus R
 	float ez, r;
+	TH2F *hZResVsR[n_layouts];
+	TCanvas *c2=new TCanvas("c2","c2",800,600);
+	c2->Divide(3,2);
 	for (int i = 0; i < n_layouts; ++i) {
+		c2->cd(i+1);		
 		fin[i] = new TFile((path + "G4_sPHENIX_" + layout[i] + ".root_g4svtx_eval.root").c_str(),"READ");
 		fin[i]->GetObject("ntp_cluster",branch[i]);
-
-		branch[i]->Draw("ez:r","(r<20)","colz");
-		h->SaveAs(("Zerror_vs_R_" + layout[i] + ".png").c_str());
+		hZResVsR[i] = new TH2F(("hZResVsR" + layout[i]).c_str(),(layout[i]+";R (cm);Z hitres (um?)").c_str(),60,0,16,10,0,0.6);
+		branch[i]->Draw(("ez:r>>hZResVsR"+layout[i]).c_str());//,"1","colz");
+		hZResVsR[i]->Draw("colz");
+		//	c->SaveAs(("Zerror_vs_R_" + layout[i] + ".png").c_str());
 	}
+	c2->SaveAs("ZRes_vs_R_multi.pdf");
 
+	return;
 	// close files
 	for (int i = 0; i < n_layouts; ++i) {
 		fin[i]->Close();
 		delete fin[i];
 	}
-
 	// delete variables
 	// when histograms are deleted something crashes, so for now there is a memory leak
-	delete h;
+	delete c;
 	delete legend;
 
 	gSystem->Exit(0);
