@@ -179,7 +179,7 @@ void kalman_uncertainty_oct17() {
 	}
 
 	
-	//compare true and predicted position-- phi only
+	//compare g4 and predicted position-- phi only
 	TH1F *hTrueGuessPhi[n_datasets][n_layouts];
 	//c0->Divide(4,2);
 	for (int i = 0; i < n_datasets; i++){
@@ -188,14 +188,30 @@ void kalman_uncertainty_oct17() {
 	    c0->cd(j+1);
 	    int bonus=1;
 	    if (layout[j]=="n") bonus=10;
-	    hTrueGuessPhi[i][j]= new TH1F(("hTrueGuessPhi" + setname[i]+ layout[j]).c_str(),(layout[j]+";phi guess-clust* (um)").c_str(),50,-4000*bonus,4000*bonus);
+	    hTrueGuessPhi[i][j]= new TH1F(("hTrueGuessPhi" + setname[i]+ layout[j]).c_str(),(layout[j]+";phi guess-true* (um)").c_str(),50,-4000*bonus,4000*bonus);
 	    tuple[i][j]->Draw(("(phi2-phi2t)*r2*1e4>>hTrueGuessPhi" + setname[i]+ layout[j]).c_str());
 	    hTrueGuessPhi[i][j]->Draw();
 	  }
 	c0->SaveAs(("TrueGuessPhi_multi_"+studypath+setname[i]+".pdf").c_str());
 	}
 
-		//compare true and predicted position-- z only
+	//compare cluster and predicted position-- phi only
+	TH1F *hClustGuessPhi[n_datasets][n_layouts];
+	//c0->Divide(4,2);
+	for (int i = 0; i < n_datasets; i++){
+	  for (int j = 0; j < n_layouts; j++){
+	    if (isZombie[i][j]) continue;
+	    c0->cd(j+1);
+	    int bonus=1;
+	    if (layout[j]=="n") bonus=10;
+	    hClustGuessPhi[i][j]= new TH1F(("hClustGuessPhi" + setname[i]+ layout[j]).c_str(),(layout[j]+";phi guess-clust* (um)").c_str(),50,-4000*bonus,4000*bonus);
+	    tuple[i][j]->Draw(("(phi2-phi2c)*r2*1e4>>hClustGuessPhi" + setname[i]+ layout[j]).c_str());
+	    hClustGuessPhi[i][j]->Draw();
+	  }
+	c0->SaveAs(("ClustGuessPhi_multi_"+studypath+setname[i]+".pdf").c_str());
+	}
+
+	//compare g4 and predicted position-- z only
 	TH1F *hTrueGuessZ[n_datasets][n_layouts];
 	//c0->Divide(4,2);
 	for (int i = 0; i < n_datasets; i++){
@@ -251,6 +267,8 @@ void kalman_uncertainty_oct17() {
 	c1->SaveAs(("ZRMS_vs_config_"+studypath+".pdf").c_str());
 
 
+
+	//RMS of Phi True - Phi Guess
 	leg[0] = new TLegend(0.20,0.65,0.40,0.8);
 	leg[1] = new TLegend(0.60,0.65,0.80,0.8);
 
@@ -279,7 +297,36 @@ void kalman_uncertainty_oct17() {
 	  leg[1]->Draw();
 	  	c1->SaveAs(("PhiRMS_vs_config_"+studypath+".pdf").c_str());
 
+	//RMS of Phi Clust - Phi Guess
 
+	leg[0] = new TLegend(0.20,0.65,0.40,0.8);
+	leg[1] = new TLegend(0.60,0.65,0.80,0.8);
+
+	for (int i=0;i<n_layouts;i++){
+	  histout[i]=new TH1F(("hRMSDeltaPhiClust"+ layout[i]).c_str(),"RMS values of #Delta_#phi;;RMS (um)",n_datasets,-0.5,n_datasets-0.5);
+	  histout[i]->SetLineColor(i+1);
+	  histout[i]->SetLineWidth(2);
+	  for (int j=0;j<n_datasets;j++){
+	    int bin=histout[i]->Fill(setname[j].c_str(),hClustGuessPhi[j][i]->GetRMS());
+	    histout[i]->SetBinError(bin,hClustGuessPhi[j][i]->GetRMSError());
+	  }
+
+	  if (i==0){
+	    histout[i]->GetYaxis()->SetRangeUser(0,5000);
+	    histout[i]->Draw();
+	  }else {
+	    histout[i]->Draw("SAME");
+	  }
+	}
+	for (int i=0;i<n_layouts;i++){
+	  if (i>=n_layouts/2){
+	    leg[1]->AddEntry(histout[i],layout[i].c_str(),"l");
+	  }else{ leg[0]->AddEntry(histout[i],layout[i].c_str(),"l");}
+	}
+	  leg[0]->Draw();
+	  leg[1]->Draw();
+	  	c1->SaveAs(("PhiGuess-ClustRMS_vs_config_"+studypath+".pdf").c_str());
+		
 	return;
 
 
