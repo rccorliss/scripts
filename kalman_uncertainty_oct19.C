@@ -136,7 +136,7 @@ void kalman_uncertainty_oct19() {
 	TH1F *hTrueGuessZ[n_datasets][n_layouts];
 	TF1 *fTrueGuessZ[n_datasets][n_layouts];
 	  drawAndFitAndSaveSet1D((TH1F**) hTrueGuessZ,(TF1**) fTrueGuessZ, c0,"(z2te-z2t)*1e4","hTrueGuessZ",";z guess-g4 (um)",50,-300,300);
-
+	  //was 10k for mom scan.
 
 	//look at trends in true and predicted position
 	//assumes z and phi histograms are packed the same way.
