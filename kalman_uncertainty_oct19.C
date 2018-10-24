@@ -29,21 +29,21 @@ const string subpath[n_datasets]={"pi+_pt0.5GeV_phi-180-180d_z-10-10cm_eta-1.2-1
 "pi+_pt1GeV_phi-180-180d_z-10-10cm_eta-1.2-1.2"};
 const string setname[n_datasets]={"0.5GeV","1.0GeV","10GeV"};
 */
-/*	
-const int n_datasets=7;
+	
+const int n_datasets=6;
 const string studypath="mom_scan";//doubles as a naming convention?
 const string subpath[n_datasets]={"pi+_pt0.5GeV_phi-180-180d_z0cm_eta-1.2-1.2",
 				  "pi+_pt0.6GeV_phi-180-180d_z0cm_eta-1.2-1.2",
 				  "pi+_pt0.7GeV_phi-180-180d_z0cm_eta-1.2-1.2",
 				  "pi+_pt0.8GeV_phi-180-180d_z0cm_eta-1.2-1.2",
 				  "pi+_pt0.9GeV_phi-180-180d_z0cm_eta-1.2-1.2",
-				  "pi+_pt1.0GeV_phi-180-180d_z0cm_eta-1.2-1.2",
-				  "pi+_pt1.1GeV_phi-180-180d_z0cm_eta-1.2-1.2"};
+				  "pi+_pt1.0GeV_phi-180-180d_z0cm_eta-1.2-1.2"};
+//				  "pi+_pt1.1GeV_phi-180-180d_z0cm_eta-1.2-1.2"};
 const string setname[n_datasets]={"0.5GeV","0.6GeV","0.7GeV","0.8GeV","0.9GeV","1.0GeV"};
-*/
+// */
 
 
-
+ /*
 // high energy sets:
 // purpose:  prove that resolutions are sane at high energy
 // so:  plot z and phi deviations as a function of angle.  At fixed _pt_ they should be similar in phi and scaling in z.
@@ -53,7 +53,7 @@ const string subpath[n_datasets]={"pi+_pt100GeV_phi0d_z0cm_eta0.2",
 "pi+_pt100GeV_phi15d_z0cm_eta0.2",
 "pi+_pt100GeV_phi30d_z0cm_eta0.2"};
 const string setname[n_datasets]={"0deg","15deg","30deg"};
-
+// */
 
 
 //and define variables that it'll make our life easier to be able to access directly:
@@ -126,11 +126,21 @@ void kalman_uncertainty_oct19() {
 	TH2F *hTrueLinPhiZ[n_datasets][n_layouts];
 	drawAndSaveSet2D((TH2F**) hTrueLinPhiZ,c0,"(z2lin-z2t)*1e4:(phi2lin-phi2t)*r2*1e4","hTrueLinPhiZ",";phi lin-g4* (um);z lin-g4(um)",50,-2000,12000,50,-35000,35000);
 
+	//compare phi of g4 and kalman vs number of hits:
+	TH2F *hTrueNhitsPhi[n_datasets][n_layouts];
+	drawAndSaveSet2D((TH2F**) hTrueNhitsPhi,c0,"nhits:(phi2te-phi2t)*r2*1e4","hTrueNhitsPhi",";phi guess-g4* (um);nhits",40,-6000,6000,10,-0.5,9.5);
+
+	//compare phi of g4 and kalman vs pt:
+	TH2F *hTruePtPhi[n_datasets][n_layouts];
+	drawAndSaveSet2D((TH2F**) hTruePtPhi,c0,"pt:(phi2te-phi2t)*r2*1e4","hTruePtPhi",";phi guess-g4* (um);pt",40,-1000,1000,40,0,500);
+	//compare nhits vs pt:
+	TH2F *hNhitsPt[n_datasets][n_layouts];
+	drawAndSaveSet2D((TH2F**) hNhitsPt,c0,"nhits:pt","hNhitsPt",";pt;nhits",50,0,2,12,-0.5,11.5);
 	
 	//compare phi of g4 and predicted position
 	TH1F *hTrueGuessPhi[n_datasets][n_layouts];
 	TF1 *fTrueGuessPhi[n_datasets][n_layouts];
-	  drawAndFitAndSaveSet1D((TH1F**) hTrueGuessPhi,(TF1**) fTrueGuessPhi, c0,"(phi2te-phi2t)*r2t*1e4","hTrueGuessPhi",";phi guess-g4* (um)",50,-10000,10000);
+	  drawAndFitAndSaveSet1D((TH1F**) hTrueGuessPhi,(TF1**) fTrueGuessPhi, c0,"(phi2te-phi2t)*r2t*1e4","hTrueGuessPhi",";phi guess-g4* (um)",50,-1000,1000);
 
 	//compare z of g4 and predicted position
 	TH1F *hTrueGuessZ[n_datasets][n_layouts];

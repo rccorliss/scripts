@@ -37,7 +37,7 @@ phi_min=-180
 phi_max=180
 
 # go through different momenta
-for pt in 0.5 0.6 0.7 0.8 0.9 1.0
+for pt in 0.5 0.6 0.7 0.8 0.9 1.0 1.1 5.0 10.0
 do
   # go through every INTT configuration
   for i in {0..7}
