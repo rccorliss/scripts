@@ -14,11 +14,12 @@
 
 
 // define constants common to all sets:
-const int n_layouts = 8;				// number of INTT layouts we are testing
-const int n_intt_layers[n_layouts] = {4,4,3,3,2,2,1,0};	// number of INTT layers in each layout
+//const int n_layouts = 8;				// number of INTT layouts we are testing
+const int n_layouts = 2;				// number of INTT layouts we are testing
+//const int n_intt_layers[n_layouts] = {4,4,3,3,2,2,1,0};	// number of INTT layers in each layout
 const string basepath = "~/sphenix/data/";	// base path to where data is located
-const string layout[n_layouts] = {"0111","1101","101","111","01","11","1","n"};	// convert layout# to layout configuration
-
+//const string layout[n_layouts] = {"0111","1101","101","111","01","11","1","n"};	// convert layout# to layout configuration
+const string layout[n_layouts] = {"11","01"};
 
 /*
 // detector image sets -- large vertex range
@@ -64,9 +65,9 @@ TTree *ntuple[n_datasets][n_layouts];	// pointers to trees in each of the respec
 //generally, I'm organizing these as returned pointers, the canvas, then the stuff needed to generate the histogram, and the names/labels/limits associated with it.
 void drawAndSaveSet2D(TH2F **histout, TCanvas *c, string drawcommand, string histname, string axislabels, int xbins,float xlow,float xhigh,int ybins,float ylow,float yhigh);
 void drawAndFitAndSaveSet1D(TH1F **histout,TF1 **fitout, TCanvas *c, string drawcommand, string histname, string axislabels, int xbins,float xlow,float xhigh);
-void drawFitParamAndSaveSet(TH1F **histout, TCanvas *c, TF1 **fit, int param, string histname, string axislabels, float maxrange);
-void drawFitErrorAndSaveSet(TH1F **histout, TCanvas *c, TF1 **fit, int param, string histname, string axislabels, float maxrange);
-void drawRMSAndSaveSet(TH1F **histout, TCanvas *c, TH1F **histin, string histname, string axislabels, float maxrange);
+void drawFitParamAndSaveSet(TH1F **histout, TCanvas *c, TF1 **fit, int param, string histname, string axislabels, float minrange, float maxrange);
+void drawFitErrorAndSaveSet(TH1F **histout, TCanvas *c, TF1 **fit, int param, string histname, string axislabels, float minrange, float maxrange);
+void drawRMSAndSaveSet(TH1F **histout, TCanvas *c, TH1F **histin, string histname, string axislabels, float minrange, float maxrange);
 
 
 void kalman_uncertainty_oct19() {
@@ -100,9 +101,11 @@ void kalman_uncertainty_oct19() {
 	//start drawing things:
 	
 	//create a canvas to draw all the 2D plots:
-	TCanvas *c0=new TCanvas("c0","c0",1000,800);
-	c0->Divide(4,2);
-	gStyle->SetOptStat(111111);
+	TCanvas *c0=new TCanvas("c0","c0",800,600);
+	c0->Divide(2,1);
+	//	TCanvas *c0=new TCanvas("c0","c0",1000,800);
+	//c0->Divide(4,2);
+	gStyle->SetOptFit(111111);
 
 
 	
@@ -132,20 +135,26 @@ void kalman_uncertainty_oct19() {
 
 	//compare phi of g4 and kalman vs pt:
 	TH2F *hTruePtPhi[n_datasets][n_layouts];
-	drawAndSaveSet2D((TH2F**) hTruePtPhi,c0,"pt:(phi2te-phi2t)*r2*1e4","hTruePtPhi",";phi guess-g4* (um);pt",40,-1000,1000,40,0,500);
+	drawAndSaveSet2D((TH2F**) hTruePtPhi,c0,"pt:(phi2te-phi2t)*r2*1e4","hTruePtPhi",";phi guess-g4* (um);pt",80,-4000,4000,40,0,3);
 	//compare nhits vs pt:
 	TH2F *hNhitsPt[n_datasets][n_layouts];
 	drawAndSaveSet2D((TH2F**) hNhitsPt,c0,"nhits:pt","hNhitsPt",";pt;nhits",50,0,2,12,-0.5,11.5);
+	//compare nintt vs pt:
+	TH2F *hNinttPt[n_datasets][n_layouts];
+	drawAndSaveSet2D((TH2F**) hNinttPt,c0,"nintt:pt","hNinttPt",";pt;nintt",50,0,2,12,-0.5,11.5);
+	//compare nmvtx vs pt:
+	TH2F *hNmvtxPt[n_datasets][n_layouts];
+	drawAndSaveSet2D((TH2F**) hNmvtxPt,c0,"nmvtx:pt","hNmvtxPt",";pt;nmvtx",50,0,2,7,-0.5,6.5);
 	
 	//compare phi of g4 and predicted position
 	TH1F *hTrueGuessPhi[n_datasets][n_layouts];
 	TF1 *fTrueGuessPhi[n_datasets][n_layouts];
-	  drawAndFitAndSaveSet1D((TH1F**) hTrueGuessPhi,(TF1**) fTrueGuessPhi, c0,"(phi2te-phi2t)*r2t*1e4","hTrueGuessPhi",";phi guess-g4* (um)",50,-1000,1000);
+	  drawAndFitAndSaveSet1D((TH1F**) hTrueGuessPhi,(TF1**) fTrueGuessPhi, c0,"(phi2te-phi2t)*r2t*1e4","hTrueGuessPhi",";phi guess-g4* (um)",50,-6000,6000);
 
 	//compare z of g4 and predicted position
 	TH1F *hTrueGuessZ[n_datasets][n_layouts];
 	TF1 *fTrueGuessZ[n_datasets][n_layouts];
-	  drawAndFitAndSaveSet1D((TH1F**) hTrueGuessZ,(TF1**) fTrueGuessZ, c0,"(z2te-z2t)*1e4","hTrueGuessZ",";z guess-g4 (um)",50,-300,300);
+	  drawAndFitAndSaveSet1D((TH1F**) hTrueGuessZ,(TF1**) fTrueGuessZ, c0,"(z2te-z2t)*1e4","hTrueGuessZ",";z guess-g4 (um)",50,-3000,3000);
 	  //was 10k for mom scan.
 
 	//look at trends in true and predicted position
@@ -154,19 +163,22 @@ void kalman_uncertainty_oct19() {
 	//create a canvas to draw all the fit results plots:
 	TCanvas *c1=new TCanvas("c1","c1",800,800);
 
-	TH1F *hResolutionZ[n_layouts];
-	drawFitParamAndSaveSet((TH1F**)hResolutionZ, c1, (TF1 **) fTrueGuessZ, 2, "hResolutionZ", ";Gaus. #sigma_z of g4-guess",5000);
+	TH1F *hResolutionSigmaZ[n_layouts];
+	drawFitParamAndSaveSet((TH1F**)hResolutionSigmaZ, c1, (TF1 **) fTrueGuessZ, 2, "hResolutionSigmaZ", ";Gaus. #sigma_z of g4-guess",0,5000);
 	TH1F *hResolutionRMSZ[n_layouts];
-	drawRMSAndSaveSet((TH1F**)hResolutionRMSZ, c1, (TH1F **) hTrueGuessZ, "hResolutionRMSZ", ";Gaus. #sigma_z of g4-guess",5000);
+	drawRMSAndSaveSet((TH1F**)hResolutionRMSZ, c1, (TH1F **) hTrueGuessZ, "hResolutionRMSZ", ";RMS #sigma_z of g4-guess",0,5000);
 	TH1F *hResolutionMeanZ[n_layouts];
-	drawFitErrorAndSaveSet((TH1F**)hResolutionMeanZ, c1, (TF1 **) fTrueGuessZ, 1, "hResolutionMeanZ", ";Gaus. #sigma_z of g4-guess",5000);
+	drawFitParamAndSaveSet((TH1F**)hResolutionMeanZ, c1, (TF1 **) fTrueGuessZ, 1, "hResolutionMeanZ", ";Mean of #sigma_z of g4-guess",-500,500);
+	TH1F *hResolutionMeanErrZ[n_layouts];
+	drawFitErrorAndSaveSet((TH1F**)hResolutionMeanErrZ, c1, (TF1 **) fTrueGuessZ, 1, "hResolutionMeanErrZ", ";Err on mean #sigma_z of g4-guess",0,500);
 
-	TH1F *hResolutionPhi[n_layouts];
-	drawFitParamAndSaveSet((TH1F**)hResolutionPhi, c1, (TF1 **) fTrueGuessPhi, 2, "hResolutionPhi", ";Gaus. #sigma_ #phi of g4-guess",5000);
+	TH1F *hResolutionSigmaPhi[n_layouts];
+	drawFitParamAndSaveSet((TH1F**)hResolutionSigmaPhi, c1, (TF1 **) fTrueGuessPhi, 2, "hResolutionSigmaPhi", ";Gaus. #sigma_ #phi of g4-guess",0,5000);
 	TH1F *hResolutionRMSPhi[n_layouts];
-	drawRMSAndSaveSet((TH1F**)hResolutionRMSPhi, c1, (TH1F **) hTrueGuessPhi, "hResolutionRMSPhi", ";Gaus. #sigma_ #phi of g4-guess",5000);
+	drawRMSAndSaveSet((TH1F**)hResolutionRMSPhi, c1, (TH1F **) hTrueGuessPhi, "hResolutionRMSPhi", ";RMS #sigma_ #phi of g4-guess",0,5000);
 	TH1F *hResolutionMeanPhi[n_layouts];
-	drawFitErrorAndSaveSet((TH1F**)hResolutionMeanPhi, c1, (TF1 **) fTrueGuessPhi, 1, "hResolutionMeanPhi", ";Gaus. #sigma_ #phi of g4-guess",5000);
+	drawFitParamAndSaveSet((TH1F**)hResolutionMeanPhi, c1, (TF1 **) fTrueGuessPhi, 1, "hResolutionMeanPhi", ";Mean of #sigma_ #phi of g4-guess",-500,500);	TH1F *hResolutionMeanErrPhi[n_layouts];
+	drawFitErrorAndSaveSet((TH1F**)hResolutionMeanErrPhi, c1, (TF1 **) fTrueGuessPhi, 1, "hResolutionMeanErrPhi", ";Err on mean #sigma_ #phi of g4-guess",0,500);
 
 	return;
 
@@ -320,7 +332,7 @@ void drawAndFitAndSaveSet1D(TH1F **histout,TF1 **fitout, TCanvas *c, string draw
   return;
 }
 
-void drawFitParamAndSaveSet(TH1F **histout, TCanvas *c, TF1 **fit, int param, string histname, string axislabels, float maxrange)
+void drawFitParamAndSaveSet(TH1F **histout, TCanvas *c, TF1 **fit, int param, string histname, string axislabels, float minrange, float maxrange)
 {
   TLegend *leg;
   c->cd();
@@ -338,7 +350,7 @@ void drawFitParamAndSaveSet(TH1F **histout, TCanvas *c, TF1 **fit, int param, st
     }
 
     if (i==0){
-      histout[i]->GetYaxis()->SetRangeUser(0,maxrange);
+      histout[i]->GetYaxis()->SetRangeUser(minrange,maxrange);
       histout[i]->Draw();
     }else {
       histout[i]->Draw("SAME");
@@ -353,7 +365,7 @@ void drawFitParamAndSaveSet(TH1F **histout, TCanvas *c, TF1 **fit, int param, st
   return;
 }
 
-void drawFitErrorAndSaveSet(TH1F **histout, TCanvas *c, TF1 **fit, int param, string histname, string axislabels, float maxrange)
+void drawFitErrorAndSaveSet(TH1F **histout, TCanvas *c, TF1 **fit, int param, string histname, string axislabels, float minrange, float maxrange)
 {
   TLegend *leg;
   c->cd();
@@ -371,7 +383,7 @@ void drawFitErrorAndSaveSet(TH1F **histout, TCanvas *c, TF1 **fit, int param, st
     }
 
     if (i==0){
-      histout[i]->GetYaxis()->SetRangeUser(0,maxrange);
+      histout[i]->GetYaxis()->SetRangeUser(minrange,maxrange);
       histout[i]->Draw();
     }else {
       histout[i]->Draw("SAME");
@@ -386,7 +398,7 @@ void drawFitErrorAndSaveSet(TH1F **histout, TCanvas *c, TF1 **fit, int param, st
   return;
 }
 
-void drawRMSAndSaveSet(TH1F **histout, TCanvas *c, TH1F **histin, string histname, string axislabels, float maxrange)
+void drawRMSAndSaveSet(TH1F **histout, TCanvas *c, TH1F **histin, string histname, string axislabels, float minrange, float maxrange)
 {
   TLegend *leg;
   c->cd();
@@ -404,7 +416,7 @@ void drawRMSAndSaveSet(TH1F **histout, TCanvas *c, TH1F **histin, string histnam
     }
 
     if (i==0){
-      histout[i]->GetYaxis()->SetRangeUser(0,maxrange);
+      histout[i]->GetYaxis()->SetRangeUser(minrange,maxrange);
       histout[i]->Draw();
     }else {
       histout[i]->Draw("SAME");
