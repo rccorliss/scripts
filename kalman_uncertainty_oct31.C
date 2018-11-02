@@ -22,21 +22,30 @@ const string basepath = "~/sphenix/data/large_set/";	// base path to where data 
 //const string layout[n_layouts] = {"11","01"};
 
 const string outpath="nov2/";
-/*
+#define set1
+
+#ifdef set1
 const string outname="all_7";
 const int n_layouts = 7;			
 const string layout[n_layouts]={//"0000",
                                   "000p","00pp",  "00zp","0ppp","0pzp","ppzp","zppp"};
-*/
+#endif
 
+#ifdef set2
 const int n_layouts = 2;				// number of INTT layouts we are testing
-//const string outname="00pp_vs_00zp";
-//const string layout[n_layouts]={"00pp",  "00zp"};
-//const string outname="pp_ppp_zppp";
+const string outname="00pp_vs_00zp";
+const string layout[n_layouts]={"00pp",  "00zp"};
+#endif
+#ifdef set3
+const int n_layouts = 3;				// number of INTT layouts we are testing
+const string outname="pp_ppp_zppp";
 //const string layout[n_layouts]={"00pp", "0ppp","zppp"};
+#endif
+#ifdef set4
+const int n_layouts = 2;				// number of INTT layouts we are testing
 const string outname="ppzp_vs_zppp";
 const string layout[n_layouts]={"ppzp","zppp"};
-
+#endif
 //const string layout[n_layouts]={"00pp",  "00zp","0ppp","0pzp","ppzp","zppp"};
 
 
@@ -118,7 +127,7 @@ void kalman_uncertainty_oct31() {
 	  c0->Divide(2,1);
 	}
 	else if (n_layouts==3 ){
-	  c0=new TCanvas("c0","c0",1000,800);
+	  c0=new TCanvas("c0","c0",1500,800);
 	  c0->Divide(3,1);
 	}
 	else{
@@ -342,7 +351,7 @@ void drawFitParamAndSaveSet(TH1F **histout, TCanvas *c, TF1 **fit, int param, st
   TLegend *leg;
   c->cd();
 	
-  leg = new TLegend(0.48,0.75,0.77,0.9);
+  leg = new TLegend(0.46,0.75,0.72,0.9);
   leg->SetNColumns(2);
     leg->AddEntry("","#it{#bf{sPHENIX}} Preliminary","");
     leg->AddEntry("","","");//for two columns, we need an additional spacer.
