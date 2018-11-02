@@ -15,20 +15,16 @@
 
 
 // define constants common to all sets:
-//const int n_layouts = 8;				// number of INTT layouts we are testing
-//const int n_intt_layers[n_layouts] = {4,4,3,3,2,2,1,0};	// number of INTT layers in each layout
-const string basepath = "~/sphenix/data/large_set/";	// base path to where data is located
-//old style: const string layout[n_layouts] = {"0111","1101","101","111","01","11","1","n"};	// convert layout# to layout configuration
-//const string layout[n_layouts] = {"11","01"};
+//const string basepath = "~/sphenix/data/large_set/";	// base path to where data is located
+const string basepath = "/gpfs/mnt/gpfs04/sphenix/user/mitay/data/";
 
-const string outpath="nov2/";
-#define set1
+const string outpath="pi+_nov2/";
+#define set4
 
 #ifdef set1
 const string outname="all_7";
 const int n_layouts = 7;			
-const string layout[n_layouts]={//"0000",
-                                  "000p","00pp",  "00zp","0ppp","0pzp","ppzp","zppp"};
+const string layout[n_layouts]={"000p","00pp","00zp","0ppp","0pzp","ppzp","zppp"};
 #endif
 
 #ifdef set2
@@ -39,7 +35,7 @@ const string layout[n_layouts]={"00pp",  "00zp"};
 #ifdef set3
 const int n_layouts = 3;				// number of INTT layouts we are testing
 const string outname="pp_ppp_zppp";
-//const string layout[n_layouts]={"00pp", "0ppp","zppp"};
+const string layout[n_layouts]={"00pp", "0ppp","zppp"};
 #endif
 #ifdef set4
 const int n_layouts = 2;				// number of INTT layouts we are testing
@@ -52,14 +48,14 @@ const string layout[n_layouts]={"ppzp","zppp"};
 
 const int n_datasets=8;
 const string studypath="mom_scan";//doubles as a naming convention?
-const string subpath[n_datasets]={"mu-_pt0.5GeV_phi-180-180d_z0cm_eta-1.2-1.2",
-				  "mu-_pt0.6GeV_phi-180-180d_z0cm_eta-1.2-1.2",
-				  "mu-_pt0.7GeV_phi-180-180d_z0cm_eta-1.2-1.2",
-				  "mu-_pt0.8GeV_phi-180-180d_z0cm_eta-1.2-1.2",
-				  "mu-_pt0.9GeV_phi-180-180d_z0cm_eta-1.2-1.2",
-				  "mu-_pt1.0GeV_phi-180-180d_z0cm_eta-1.2-1.2",
-				  "mu-_pt2.0GeV_phi-180-180d_z0cm_eta-1.2-1.2",
-				  "mu-_pt3.0GeV_phi-180-180d_z0cm_eta-1.2-1.2"};
+const string subpath[n_datasets]={"pi+_pt0.5GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "pi+_pt0.6GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "pi+_pt0.7GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "pi+_pt0.8GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "pi+_pt0.9GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "pi+_pt1.0GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "pi+_pt2.0GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "pi+_pt3.0GeV_phi-180-180d_z0cm_eta-1.2-1.2"};
 //const string setname[n_datasets]={"0.5GeV","0.6GeV","0.7GeV","0.8GeV","0.9GeV","1.0GeV","2.0GeV","3.0GeV"};
 const string setname[n_datasets]={"0.5","0.6","0.7","0.8","0.9","1.0","2.0","3.0"};
 
@@ -252,12 +248,15 @@ etabinwidth=0.8;
 
 void drawAndSaveSet2D(TH2F **histout, TCanvas *c, string drawcommand, string histname, string axislabels, int xbins,float xlow,float xhigh,int ybins,float ylow,float yhigh)
 {
+  //printf(layout[1].c_str());
+  //printf(axislabels.c_str());
+  //printf("\n");
   //assumes c has enough divisions to cover all of these.
   int nsets=n_datasets;
   int nsubs=n_layouts;
   for (int i = 0; i < nsets; i++){
     for (int j = 0; j < nsubs; j++){
-      histout[i*nsubs+j]= new TH2F((histname + setname[i]+ layout[j]).c_str(),(layout[j]+axislabels).c_str(),xbins,xlow,xhigh,ybins,ylow,yhigh);
+      histout[i*nsubs+j]= new TH2F((histname + setname[i]+ layout[j]).c_str(),(layout[j]+axislabels.c_str()).c_str(),xbins,xlow,xhigh,ybins,ylow,yhigh);
 
       c->cd(j+1);
       if (!isZombie[i][j])
@@ -279,7 +278,7 @@ void drawAndSaveSet1D(TH1F **histout, TCanvas *c, string drawcommand, string his
   for (int i = 0; i < nsets; i++){
     for (int j = 0; j < nsubs; j++){
       c->cd(j+1);
-      ht=histout[i*nsubs+j]= new TH1F((histname + setname[i]+ layout[j]).c_str(),(layout[j]+axislabels).c_str(),xbins,xlow,xhigh);
+      ht=histout[i*nsubs+j]= new TH1F((histname + setname[i]+ layout[j]).c_str(),(layout[j]+axislabels.c_str()).c_str(),xbins,xlow,xhigh);
       if (!isZombie[i][j])
 	ntuple[i][j]->Draw((drawcommand+">>"+histname + setname[i]+ layout[j]).c_str());
 
@@ -302,7 +301,7 @@ void drawAndFitAndSaveSet1D(TH1F **histout,TF1 **fitout, TCanvas *c, string draw
   for (int i = 0; i < nsets; i++){
     for (int j = 0; j < nsubs; j++){
       c->cd(j+1);
-      ht=histout[i*nsubs+j]= new TH1F((histname + setname[i]+ layout[j]).c_str(),(layout[j]+axislabels).c_str(),xbins,xlow,xhigh);
+      ht=histout[i*nsubs+j]= new TH1F((histname + setname[i]+ layout[j]).c_str(),(layout[j]+""+axislabels.c_str()).c_str(),xbins,xlow,xhigh);
       ft=fitout[i*nsubs+j]=new TF1(("fit"+histname + setname[i]+ layout[j]).c_str(),"gaus(0)",xlow,xhigh);
 
       ft->SetParNames("scale","x0","sigma");
@@ -329,7 +328,7 @@ void drawAndFitAndSaveSet1D(TH1F **histout,TF1 **fitout, TCanvas *c, string draw
   for (int i = 0; i < nsets; i++){
     for (int j = 0; j < nsubs; j++){
       c->cd(j+1);
-      ht=histout[i*nsubs+j]= new TH1F((histname + setname[i]+ layout[j]).c_str(),(layout[j]+axislabels).c_str(),xbins,xlow,xhigh);
+      ht=histout[i*nsubs+j]= new TH1F((histname + setname[i]+ layout[j]).c_str(),(layout[j]+axislabels.c_str()).c_str(),xbins,xlow,xhigh);
       ft=fitout[i*nsubs+j]=new TF1(("fit"+histname + setname[i]+ layout[j]).c_str(),"gaus(0)",xlow,xhigh);
 
       ft->SetParNames("scale","x0","sigma");
