@@ -1,4 +1,4 @@
-// Author: Molly Taylor
+// Author: Molly Taylor and Ross Corliss
 // Date: 10/02/18
 // Goal: plot histograms of uncertainty in R, PHI, and Z for six INTT configurations.
 
@@ -15,11 +15,13 @@
 
 
 // define constants common to all sets:
-const string basepath = "~/sphenix/data/large_set/";	// base path to where data is located
+const string basepath = "~/sphenix/data/auto/";
 //const string basepath = "/gpfs/mnt/gpfs04/sphenix/user/mitay/data/";
 
 const string outpath="mu-_nov2/";
-#define set1
+const string particlename="mu-";
+
+#define compare_particles
 
 #ifdef set1
 const string outname="all_7";
@@ -31,34 +33,72 @@ const string layout[n_layouts]={"000p","00pp","00zp","0ppp","0pzp","ppzp","zppp"
 const int n_layouts = 2;				// number of INTT layouts we are testing
 const string outname="00pp_vs_00zp";
 const string layout[n_layouts]={"00pp",  "00zp"};
+const int n_datasets=8;
+const string studypath="mom_scan";//doubles as a naming convention?
+const string pathsuffix[n_datasets]={"_pt0.5GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt0.6GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt0.7GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt0.8GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt0.9GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt1.0GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt2.0GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt3.0GeV_phi-180-180d_z0cm_eta-1.2-1.2"};
+const string setname[n_datasets]={"0.5","0.6","0.7","0.8","0.9","1.0","2.0","3.0"};
 #endif
 #ifdef set3
 const int n_layouts = 3;				// number of INTT layouts we are testing
 const string outname="pp_ppp_zppp";
 const string layout[n_layouts]={"00pp", "0ppp","zppp"};
+const int n_datasets=8;
+const string studypath="mom_scan";//doubles as a naming convention?
+const string pathsuffix[n_datasets]={"_pt0.5GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt0.6GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt0.7GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt0.8GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt0.9GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt1.0GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt2.0GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt3.0GeV_phi-180-180d_z0cm_eta-1.2-1.2"};
+const string setname[n_datasets]={"0.5","0.6","0.7","0.8","0.9","1.0","2.0","3.0"};
 #endif
 #ifdef set4
 const int n_layouts = 2;				// number of INTT layouts we are testing
 const string outname="ppzp_vs_zppp";
 const string layout[n_layouts]={"ppzp","zppp"};
+const int n_datasets=8;
+const string studypath="mom_scan";//doubles as a naming convention?
+const string pathsuffix[n_datasets]={"_pt0.5GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt0.6GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt0.7GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt0.8GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt0.9GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt1.0GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt2.0GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt3.0GeV_phi-180-180d_z0cm_eta-1.2-1.2"};
+const string setname[n_datasets]={"0.5","0.6","0.7","0.8","0.9","1.0","2.0","3.0"};
 #endif
 //const string layout[n_layouts]={"00pp",  "00zp","0ppp","0pzp","ppzp","zppp"};
 
+#ifdef compare_particles
+//this hijacks the existing structures, except that it changes how the initial files are loaded so they pull
+// multiple particles rather than configurations.  Naming conventions should work fine.
+const string single_layout="zppp";
+const int n_layouts=4;
+const string outname="particles";
 
-
+const string layout[n_layouts]={"e-","mu-","pi-","pi+"}; 
 const int n_datasets=8;
 const string studypath="mom_scan";//doubles as a naming convention?
-const string subpath[n_datasets]={"mu-_pt0.5GeV_phi-180-180d_z0cm_eta-1.2-1.2",
-				  "mu-_pt0.6GeV_phi-180-180d_z0cm_eta-1.2-1.2",
-				  "mu-_pt0.7GeV_phi-180-180d_z0cm_eta-1.2-1.2",
-				  "mu-_pt0.8GeV_phi-180-180d_z0cm_eta-1.2-1.2",
-				  "mu-_pt0.9GeV_phi-180-180d_z0cm_eta-1.2-1.2",
-				  "mu-_pt1.0GeV_phi-180-180d_z0cm_eta-1.2-1.2",
-				  "mu-_pt2.0GeV_phi-180-180d_z0cm_eta-1.2-1.2",
-				  "mu-_pt3.0GeV_phi-180-180d_z0cm_eta-1.2-1.2"};
-//const string setname[n_datasets]={"0.5GeV","0.6GeV","0.7GeV","0.8GeV","0.9GeV","1.0GeV","2.0GeV","3.0GeV"};
+const string pathsuffix[n_datasets]={"_pt0.5GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt0.6GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt0.7GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt0.8GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt0.9GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt1.0GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt2.0GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt3.0GeV_phi-180-180d_z0cm_eta-1.2-1.2"};
 const string setname[n_datasets]={"0.5","0.6","0.7","0.8","0.9","1.0","2.0","3.0"};
-
+#endif
 
 
 //and define variables that it'll make our life easier to be able to access directly:
@@ -76,19 +116,19 @@ void drawFitErrorAndSaveSet(TH1F **histout, TCanvas *c, TF1 **fit, int param, st
 void drawRMSAndSaveSet(TH1F **histout, TCanvas *c, TH1F **histin, string histname, string axislabels, float minrange, float maxrange);
 
 
-void kalman_uncertainty_oct31() {
+void kalman_uncertainty_nov7() {
   //rcc says: don't need to do this just to read basic structures:  gSystem->Load("libg4hough.so");
 
   
   SetsPhenixStyle();
 
-  
-	//  files, branches and their associated 'isZombie' (this could be called each time by fin[z][q]->isZombie() as well)
+#ifndef compare_particles
   	const string path=basepath+studypath+"/";
+	for (int i = 0; i < n_datasets; i++){
+	  subpath[i]=particlename+pathsuffix[i];
+	}
 
-
-
-	//open all the files we need.  first index is subpath, second index is layour.
+	//open all the files we need.  first index is subpath, second index is layout.
 	for (int i = 0; i < n_datasets; i++){
 	  for (int j = 0; j < n_layouts; j++){
 	    isZombie[i][j]=false;
@@ -98,7 +138,21 @@ void kalman_uncertainty_oct31() {
 	    fin[i][j]->GetObject("kalman_extrapolation_eval",ntuple[i][j]);
 	  }
 	}
+#endif
+#ifdef compare_particles
+	//open all the files we need.  first index is subpath, second index is layout -- in this case, particle species.
+	const string path=basepath+studypath+"/";
 
+	for (int i = 0; i < n_datasets; i++){
+	  for (int j = 0; j < n_layouts; j++){
+	    isZombie[i][j]=false;
+	    fin[i][j] = new TFile((path + layout[j]+pathsuffix[i]+"/G4_sPHENIX_" + single_layout + ".root_g4kalman_eval.root").c_str(),"READ");
+	    isZombie[i][j]=fin[i][j]->IsZombie();
+	    if (isZombie[i][j]) continue; //skip them if the file is broken.
+	    fin[i][j]->GetObject("kalman_extrapolation_eval",ntuple[i][j]);
+	  }
+	}
+#endif
 
 	// leaf names to pass by reference
 	float sigma_phi, sigma_z, sigma_r;
