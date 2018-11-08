@@ -17,15 +17,16 @@
 // define constants common to all sets:
 const string basepath = "~/sphenix/data/auto/";
 //const string basepath = "/gpfs/mnt/gpfs04/sphenix/user/mitay/data/";
+const string studypath="mom_scan_110618";//doubles as a naming convention?
 
-const string outpath="mu-_nov2/";
+const string outpath="all_nov7_zoom/";
 const string particlename="mu-";
 
 #define compare_particles
 
 #ifdef set1
 const string outname="all_7";
-const int n_layouts = 7;			
+const int n_layouts = 7;
 const string layout[n_layouts]={"000p","00pp","00zp","0ppp","0pzp","ppzp","zppp"};
 #endif
 
@@ -34,7 +35,6 @@ const int n_layouts = 2;				// number of INTT layouts we are testing
 const string outname="00pp_vs_00zp";
 const string layout[n_layouts]={"00pp",  "00zp"};
 const int n_datasets=8;
-const string studypath="mom_scan";//doubles as a naming convention?
 const string pathsuffix[n_datasets]={"_pt0.5GeV_phi-180-180d_z0cm_eta-1.2-1.2",
 				  "_pt0.6GeV_phi-180-180d_z0cm_eta-1.2-1.2",
 				  "_pt0.7GeV_phi-180-180d_z0cm_eta-1.2-1.2",
@@ -50,7 +50,6 @@ const int n_layouts = 3;				// number of INTT layouts we are testing
 const string outname="pp_ppp_zppp";
 const string layout[n_layouts]={"00pp", "0ppp","zppp"};
 const int n_datasets=8;
-const string studypath="mom_scan";//doubles as a naming convention?
 const string pathsuffix[n_datasets]={"_pt0.5GeV_phi-180-180d_z0cm_eta-1.2-1.2",
 				  "_pt0.6GeV_phi-180-180d_z0cm_eta-1.2-1.2",
 				  "_pt0.7GeV_phi-180-180d_z0cm_eta-1.2-1.2",
@@ -66,7 +65,6 @@ const int n_layouts = 2;				// number of INTT layouts we are testing
 const string outname="ppzp_vs_zppp";
 const string layout[n_layouts]={"ppzp","zppp"};
 const int n_datasets=8;
-const string studypath="mom_scan";//doubles as a naming convention?
 const string pathsuffix[n_datasets]={"_pt0.5GeV_phi-180-180d_z0cm_eta-1.2-1.2",
 				  "_pt0.6GeV_phi-180-180d_z0cm_eta-1.2-1.2",
 				  "_pt0.7GeV_phi-180-180d_z0cm_eta-1.2-1.2",
@@ -88,7 +86,6 @@ const string outname="particles";
 
 const string layout[n_layouts]={"e-","mu-","pi-","pi+"}; 
 const int n_datasets=8;
-const string studypath="mom_scan";//doubles as a naming convention?
 const string pathsuffix[n_datasets]={"_pt0.5GeV_phi-180-180d_z0cm_eta-1.2-1.2",
 				  "_pt0.6GeV_phi-180-180d_z0cm_eta-1.2-1.2",
 				  "_pt0.7GeV_phi-180-180d_z0cm_eta-1.2-1.2",
@@ -193,7 +190,18 @@ void kalman_uncertainty_nov7() {
 
 	//compare true and kalman extrapolated position
 	TH2F *hTrueGuessPhiZ[n_datasets][n_layouts];
-	drawAndSaveSet2D((TH2F**) hTrueGuessPhiZ,c0,"(z2te-z2t)*1e4:(phi2te-phi2t)*r2*1e4","hDelta2D",";phi guess-g4* [um];z guess-g4[um]",50,-4000,4000,50,-20000,20000);
+	drawAndSaveSet2D((TH2F**) hTrueGuessPhiZ,c0,"(z2te-z2t)*10:(phi2te-phi2t)*r2*10","hDelta2D",";phi guess-g4* [mm];z guess-g4[mm]",50,-0.5,0.5,50,-2,2);
+	//	drawAndSaveSet2D((TH2F**) hTrueGuessPhiZ,c0,"(z2te-z2t)*10:(phi2te-phi2t)*r2*10","hDelta2D",";phi guess-g4* [mm];z guess-g4[mm]",50,-3,3,50,-15,15);
+
+		//compare true and kalman extrapolated position
+
+       	TH2F *hG4vsClusterTrack2D[n_datasets][n_layouts];
+	drawAndSaveSet2D((TH2F**) hG4vsClusterTrack2D,c0,"(z2te-g4_z30)*10:(phi2te-g4_phi30)*r2te*10","hG4vsClusterTrack2D",";phi cltrack-g4track [mm];z cltrack-g4track[mm]",50,-0.5,0.5,50,-2,2);
+	//drawAndSaveSet2D((TH2F**) hG4vsClusterTrack2D,c0,"(z2te-g4_z30)*10:(phi2te-g4_phi30)*r2te*10","hG4vsClusterTrack2D",";phi cltrack-g4track [mm];z cltrack-g4track[mm]",50,-3,3,50,-15,15);
+
+	TH2F *hG4vsTruth2D[n_datasets][n_layouts];
+	drawAndSaveSet2D((TH2F**) hG4vsClusterTrack2D,c0,"(z2t-g4_z30)*10:(phi2t-g4_phi30)*r2t*10","hG4vsTruth2D",";phi truth-g4track [mm];z truth-g4track[mm]",50,-0.5,0.5,50,-2,2);
+	//	drawAndSaveSet2D((TH2F**) hG4vsClusterTrack2D,c0,"(z2t-g4_z30)*10:(phi2t-g4_phi30)*r2t*10","hG4vsTruth2D",";phi truth-g4track [mm];z truth-g4track[mm]",50,-3,3,50,-15,15);
 
 	//check ng4hits
 	TH1F *hG4Hits[n_datasets][n_layouts];
@@ -208,6 +216,17 @@ void kalman_uncertainty_nov7() {
 	TH1F *hTrueGuessZ[n_datasets][n_layouts];
 	TF1 *fTrueGuessZ[n_datasets][n_layouts];
 	  drawAndFitAndSaveSet1D((TH1F**) hTrueGuessZ,(TF1**) fTrueGuessZ, c0,"(z2te-z2t)*10","hDeltaZ",";z guess-g4 [mm]",50,-3,3);
+
+	//compare phi of g4 and predicted position
+	TH1F *hTrueGuessPhig4[n_datasets][n_layouts];
+	TF1 *fTrueGuessPhig4[n_datasets][n_layouts];
+	  drawAndFitAndSaveSet1D((TH1F**) hTrueGuessPhig4,(TF1**) fTrueGuessPhig4, c0,"(g4_phi30-phi2t)*r2t*10","hDeltaPhiG4",";phi g4kalman-g4truth [mm]",80,-8,8);
+
+	  //compare z of g4 and predicted position
+	TH1F *hTrueGuessZg4[n_datasets][n_layouts];
+	TF1 *fTrueGuessZg4[n_datasets][n_layouts];
+	  drawAndFitAndSaveSet1D((TH1F**) hTrueGuessZg4,(TF1**) fTrueGuessZg4, c0,"(g4_z30-z2t)*10","hDeltaZG4",";z g4kalman-g4truth [mm]",50,-3,3);
+
 	  //was 10k for mom scan.
 
 	//look at trends in true and predicted position
@@ -223,6 +242,12 @@ void kalman_uncertainty_nov7() {
 	TH1F *hResolutionSigmaPhi[n_layouts];
 	drawFitParamAndSaveSet((TH1F**)hResolutionSigmaPhi, c1, (TF1 **) fTrueGuessPhi, 2, "hResPhi",";pT [GeV];#phi res. at 30cm [mm]",0,3);
 
+	TH1F *hResolutionSigmaZg4[n_layouts];
+	drawFitParamAndSaveSet((TH1F**)hResolutionSigmaZg4, c1, (TF1 **) fTrueGuessZg4, 2, "hResZg4", ";pT [GeV];z res. at 30cm w/ g4track[mm]",0,3);
+
+
+	TH1F *hResolutionSigmaPhig4[n_layouts];
+	drawFitParamAndSaveSet((TH1F**)hResolutionSigmaPhig4, c1, (TF1 **) fTrueGuessPhig4, 2, "hResPhig4",";pT [GeV];#phi res. at 30cm w/ g4track[mm]",0,3);
 
 
 
@@ -297,7 +322,7 @@ void drawAndSaveSet2D(TH2F **histout, TCanvas *c, string drawcommand, string his
   int nsubs=n_layouts;
   for (int i = 0; i < nsets; i++){
     for (int j = 0; j < nsubs; j++){
-      histout[i*nsubs+j]= new TH2F((histname + setname[i]+ layout[j]).c_str(),(layout[j]+axislabels.c_str()).c_str(),xbins,xlow,xhigh,ybins,ylow,yhigh);
+      histout[i*nsubs+j]= new TH2F((string(histname) + string(setname[i])+ string(layout[j])).c_str(),(string(layout[j])+string(axislabels)).c_str(),xbins,xlow,xhigh,ybins,ylow,yhigh);
 
       c->cd(j+1);
       if (!isZombie[i][j])
@@ -319,7 +344,7 @@ void drawAndSaveSet1D(TH1F **histout, TCanvas *c, string drawcommand, string his
   for (int i = 0; i < nsets; i++){
     for (int j = 0; j < nsubs; j++){
       c->cd(j+1);
-      ht=histout[i*nsubs+j]= new TH1F((histname + setname[i]+ layout[j]).c_str(),(layout[j]+axislabels.c_str()).c_str(),xbins,xlow,xhigh);
+      ht=histout[i*nsubs+j]= new TH1F((string(histname) + string(setname[i])+ string(layout[j])).c_str(),(string(layout[j])+string(axislabels)).c_str(),xbins,xlow,xhigh);
       if (!isZombie[i][j])
 	ntuple[i][j]->Draw((drawcommand+">>"+histname + setname[i]+ layout[j]).c_str());
 
@@ -342,7 +367,7 @@ void drawAndFitAndSaveSet1D(TH1F **histout,TF1 **fitout, TCanvas *c, string draw
   for (int i = 0; i < nsets; i++){
     for (int j = 0; j < nsubs; j++){
       c->cd(j+1);
-      ht=histout[i*nsubs+j]= new TH1F((histname + setname[i]+ layout[j]).c_str(),(layout[j]+axislabels.c_str()).c_str(),xbins,xlow,xhigh);
+      ht=histout[i*nsubs+j]= new TH1F((string(histname) + string(setname[i])+ string(layout[j])).c_str(),(string(layout[j])+string(axislabels)).c_str(),xbins,xlow,xhigh);
       ft=fitout[i*nsubs+j]=new TF1(("fit"+histname + setname[i]+ layout[j]).c_str(),"gaus(0)",xlow,xhigh);
 
       ft->SetParNames("scale","x0","sigma");
@@ -369,15 +394,15 @@ void drawAndFitAndSaveSet1D(TH1F **histout,TF1 **fitout, TCanvas *c, string draw
   for (int i = 0; i < nsets; i++){
     for (int j = 0; j < nsubs; j++){
       c->cd(j+1);
-      ht=histout[i*nsubs+j]= new TH1F((histname + setname[i]+ layout[j]).c_str(),(layout[j]+axislabels.c_str()).c_str(),xbins,xlow,xhigh);
+      ht=histout[i*nsubs+j]= new TH1F((string(histname) + string(setname[i])+ string(layout[j])).c_str(),(string(layout[j])+string(axislabels)).c_str(),xbins,xlow,xhigh);
       ft=fitout[i*nsubs+j]=new TF1(("fit"+histname + setname[i]+ layout[j]).c_str(),"gaus(0)",xlow,xhigh);
 
       ft->SetParNames("scale","x0","sigma");
-      ft->SetParameters(ht->GetEntries(),ht->GetMean(),ht->GetRMS());
       if (!isZombie[i][j])
 	ntuple[i][j]->Draw((drawcommand+">>"+histname + setname[i]+ layout[j]).c_str(),weightcommand.c_str());
 
       histout[i*nsubs+j]->Draw();
+      ft->SetParameters(ht->GetEntries(),ht->GetMean(),ht->GetRMS());
       ht->Fit(ft);
     }
     c->SaveAs((outpath+histname+"_"+outname+"_"+setname[i]+".pdf").c_str());
@@ -397,7 +422,7 @@ void drawFitParamAndSaveSet(TH1F **histout, TCanvas *c, TF1 **fit, int param, st
     leg->AddEntry("","","");//for two columns, we need an additional spacer.
 
     for (int i=0;i<n_layouts;i++){
-    histout[i]=new TH1F((histname+ layout[i]).c_str(),axislabels.c_str(),n_datasets,-0.5,n_datasets-0.5);
+      histout[i]=new TH1F((string(histname)+ string(layout[i])).c_str(),axislabels.c_str(),n_datasets,-0.5,n_datasets-0.5);
     histout[i]->SetLineColor(i+1);
     histout[i]->SetMarkerColor(i+1);
     //    histout[i]->SetLineWidth(2);
@@ -433,7 +458,7 @@ void drawFitErrorAndSaveSet(TH1F **histout, TCanvas *c, TF1 **fit, int param, st
     leg->AddEntry("","","");//for two columns, we need an additional spacer.
 
   for (int i=0;i<n_layouts;i++){
-    histout[i]=new TH1F((histname+ layout[i]).c_str(),axislabels.c_str(),n_datasets,-0.5,n_datasets-0.5);
+    histout[i]=new TH1F((string(histname)+ string(layout[i])).c_str(),axislabels.c_str(),n_datasets,-0.5,n_datasets-0.5);
     histout[i]->SetLineColor(i+1);
         histout[i]->SetMarkerColor(i+1);
 
@@ -470,7 +495,7 @@ void drawRMSAndSaveSet(TH1F **histout, TCanvas *c, TH1F **histin, string histnam
     leg->AddEntry("","","");//for two columns, we need an additional spacer.
 
   for (int i=0;i<n_layouts;i++){
-    histout[i]=new TH1F((histname+ layout[i]).c_str(),axislabels.c_str(),n_datasets,-0.5,n_datasets-0.5);
+    histout[i]=new TH1F((string(histname)+ string(layout[i])).c_str(),axislabels.c_str(),n_datasets,-0.5,n_datasets-0.5);
     histout[i]->SetLineColor(i+1);
         histout[i]->SetMarkerColor(i+1);
 
