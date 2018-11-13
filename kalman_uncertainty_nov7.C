@@ -13,6 +13,8 @@
 #include "TFile.h"
 #include "sPhenixStyle.C" //attempting to incorporate this successfully...3
 
+//beautification details:
+const string sPHENIXbanner="#it{#bf{sPHENIX}} Simulation";
 
 // define constants common to all sets:
 const string basepath = "~/sphenix/data/auto/";
@@ -418,7 +420,7 @@ void drawFitParamAndSaveSet(TH1F **histout, TCanvas *c, TF1 **fit, int param, st
 	
   leg = new TLegend(0.46,0.75,0.72,0.9);
   leg->SetNColumns(2);
-    leg->AddEntry("","#it{#bf{sPHENIX}} Preliminary","");
+    leg->AddEntry("",sPHENIXbanner.c_str(),"");
     leg->AddEntry("","","");//for two columns, we need an additional spacer.
 
     for (int i=0;i<n_layouts;i++){
@@ -454,7 +456,7 @@ void drawFitErrorAndSaveSet(TH1F **histout, TCanvas *c, TF1 **fit, int param, st
 	
   leg = new TLegend(0.20,0.75,0.480,0.9);
   leg->SetNColumns(2);
-    leg->AddEntry("","#it{#bf{sPHENIX}} Preliminary","");
+  leg->AddEntry("",sPHENIXbanner.c_str(),"");
     leg->AddEntry("","","");//for two columns, we need an additional spacer.
 
   for (int i=0;i<n_layouts;i++){
@@ -491,7 +493,7 @@ void drawRMSAndSaveSet(TH1F **histout, TCanvas *c, TH1F **histin, string histnam
 	
   leg = new TLegend(0.20,0.15,0.480,0.3);
   leg->SetNColumns(2);
-    leg->AddEntry("","#it{#bf{sPHENIX}} Preliminary","");
+  leg->AddEntry("",sPHENIXbanner.c_str(),"");
     leg->AddEntry("","","");//for two columns, we need an additional spacer.
 
   for (int i=0;i<n_layouts;i++){
