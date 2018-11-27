@@ -12,11 +12,24 @@ nsubmitted=0
 
 while read inst
 do
-  echo "$inst"
 
 filename=${inst##*/}
 fileprefix=${filename%%.root*}
-config=${fileprefix##*_}
+config=${fileprefix##*sPHENIX_}
+
+    case $config in
+      zppp) configi=0;;
+      ppzp) configi=1;;
+      0pzp) configi=2;;
+      0ppp) configi=3;;
+      00zp) configi=4;;
+      00pp) configi=5;;
+      000p) configi=6;;
+      0000) configi=7;;
+      00pp_out) configi=8;;
+      *) config=xxxx configi=-1;;
+    esac
+
 
 dirblock=${inst%/*}
 dirname=${dirblock##*/}
@@ -37,30 +50,30 @@ etablock=$(echo $dirname | cut -f5 -d_)
 eta_min=-1.2
 eta_max=1.2
 
-if [ nsubmitted == 0 ]
-   then	 
-       echo input $inst
-       echo parses as:
-       echo particle=$particle
-       echo pt=$pt
-       echo config=$config
-       nsubmitted=1
-fi
+#if [ nsubmitted==0 ]
+#   then	 
+#       echo input $inst
+#       echo parses as:
+#       echo particle=$particle
+#       echo pt=$pt
+#       echo config=$config
+#       nsubmitted=1
+#fi
 
     directory="$particle"_pt"$pt"GeV_phi"$phi_min"-"$phi_max"d_z"$z"cm_eta"$eta_min"-"$eta_max"
 
 
     # check to see if there is a directory for this data set; create one if there isn't
-    if [ ! -d "$data"/"$parent" ]; then
-      mkdir "$data"/"$parent"
-    fi
+#    if [ ! -d "$data"/"$parent" ]; then
+#      mkdir "$data"/"$parent"
+#    fi
 
-    if [ ! -d "$data"/"$parent"/"$directory" ]; then
-      mkdir "$data"/"$parent"/"$directory"
-    fi
+#    if [ ! -d "$data"/"$parent"/"$directory" ]; then
+#      mkdir "$data"/"$parent"/"$directory"
+#    fi
 
-    path="$data"/"$parent"/"$directory"
+    path=/"$data"/"$parent"/"$directory"
 
-    echo condor_submit simple_job.job n_events=$n_events i=$i z_width=$z eta_min=$eta_min eta_max=$eta_max pt_min=$pt pt_max=$pt phi_min=$phi_min phi_max=$phi_max particle=$particle path=$path config=$config
+    echo condor_submit simple_job.job n_events=$n_events i=$configi z_width=$z eta_min=$eta_min eta_max=$eta_max pt_min=$pt pt_max=$pt phi_min=$phi_min phi_max=$phi_max particle=$particle path=$path config=$config
 
 done < "${1:-/dev/stdin}"
