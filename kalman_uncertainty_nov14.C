@@ -19,16 +19,26 @@ const string sPHENIXbanner="#it{#bf{sPHENIX}} Simulation";
 // define constants common to all sets:
 const string basepath = "~/sphenix/data/auto/";
 //const string basepath = "/gpfs/mnt/gpfs04/sphenix/user/mitay/data/";
-const string studypath="mom_scan_111318";//doubles as a naming convention?
+const string studypath="mom_scan_112418_manual";//doubles as a naming convention?
 
-const string outpath="all_nov14/";
-const string particlename="mu-";
+const string outpath="112418/";
+const string particlename="pi+";
 
-#define compare_particles
+#define set1
 
 #ifdef set1
-const string outname="all_7";
+const string outname="classic";
 const int n_layouts = 7;
+const int n_datasets=8;
+const string pathsuffix[n_datasets]={"_pt0.5GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt0.6GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt0.7GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt0.8GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt0.9GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt1.0GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt2.0GeV_phi-180-180d_z0cm_eta-1.2-1.2",
+				  "_pt3.0GeV_phi-180-180d_z0cm_eta-1.2-1.2"};
+const string setname[n_datasets]={"0.5","0.6","0.7","0.8","0.9","1.0","2.0","3.0"};
 const string layout[n_layouts]={"000p","00pp","00zp","0ppp","0pzp","ppzp","zppp"};
 #endif
 
@@ -123,6 +133,7 @@ void kalman_uncertainty_nov14() {
 
 #ifndef compare_particles
   	const string path=basepath+studypath+"/";
+	string subpath[n_datasets];
 	for (int i = 0; i < n_datasets; i++){
 	  subpath[i]=particlename+pathsuffix[i];
 	}
@@ -192,7 +203,7 @@ void kalman_uncertainty_nov14() {
 
 	//compare true and kalman extrapolated position
 	TH2F *hTrueGuessPhiZ[n_datasets][n_layouts];
-	drawAndSaveSet2D((TH2F**) hTrueGuessPhiZ,c0,"(z30te-z30t)*10:(phi30te-phi30t)*r2*10","hDelta2D",";phi guess-g4* [mm];z guess-g4[mm]",50,-3,3,50,-15,15);
+	drawAndSaveSet2D((TH2F**) hTrueGuessPhiZ,c0,"(z30te-z30t)*10:(phi30te-phi30t)*r30t*10","hDelta2D",";phi guess-g4* [mm];z guess-g4[mm]",50,-3,3,50,-15,15);
 
 		//compare true and kalman extrapolated position
 
@@ -228,13 +239,13 @@ void kalman_uncertainty_nov14() {
 
 	  //was 10k for mom scan.
 
-
+	  /*
 	TH1F *hTrueGuessZtemp[n_datasets][n_layouts];
 	TF1 *fTrueGuessZtemp[n_datasets][n_layouts];
 	for (float ptlow=0;ptlow<ptmax;ptlow+=ptstep){
 	drawAndFitAndSaveSet1D((TH1F**) hTrueGuessZg4,(TF1**) fTrueGuessZg4, c0,"(g4_z30te-g4_z30t)*10",Form("true_pti>%f && true_pti<%f",ptlow,pthigh),"hDeltaZtemp",";z g4kalman-g4truth [mm]",50,-3,3);
 	}
-
+	  */
 
 	  
 
@@ -273,18 +284,18 @@ void kalman_uncertainty_nov14() {
 	TH1F *htempResolution[n_layouts];
 	float etabinmidpoint=0.0;
 	float etabinwidth=0.8;
-	drawAndFitAndSaveSet1D((TH1F**) htempTrueGuessPhi,(TF1**) ftempTrueGuessPhi, c0,"(phi2te-phi2t)*r2t*10",
+	drawAndFitAndSaveSet1D((TH1F**) htempTrueGuessPhi,(TF1**) ftempTrueGuessPhi, c0,"(phi30te-phi30t)*r30t*10",
 			       Form("abs(abs(0.5*log( (sqrt(pt*pt+pz*pz)+pz)/(sqrt(pt*pt+pz*pz)-pz))) -%f)<=%f",etabinmidpoint,etabinwidth/2.0),
 			       "hDeltaPhi_eta_0",";#Delta #phi [um]",50,-6,6);
 	drawFitParamAndSaveSet((TH1F**)htempResolution, c1, (TF1 **) ftempTrueGuessPhi, 2, "hResolutionSigmaPhi_central", ";pT [GeV];#phi res. at 30cm [mm]",0,2);
 	etabinwidth=0.4;//since we have two separate regions that fill this now.
 	etabinmidpoint=0.6;
-	drawAndFitAndSaveSet1D((TH1F**) htempTrueGuessPhi,(TF1**) ftempTrueGuessPhi, c0,"(phi2te-phi2t)*r2t*10",
+	drawAndFitAndSaveSet1D((TH1F**) htempTrueGuessPhi,(TF1**) ftempTrueGuessPhi, c0,"(phi30te-phi30t)*r30t*10",
 			       Form("abs(abs(0.5*log( (sqrt(pt*pt+pz*pz)+pz)/(sqrt(pt*pt+pz*pz)-pz))) -%f)<=%f",etabinmidpoint,etabinwidth/2.0),
 			       "hDeltaPhi_eta_0.6",";#Delta #phi [um]",50,-6,6);
 	drawFitParamAndSaveSet((TH1F**)htempResolution, c1, (TF1 **) ftempTrueGuessPhi, 2, "hResolutionSigmaPhi_mid", ";pT [GeV];#phi res. at 30cm [mm]",0,2);
 	etabinmidpoint=1.0;
-	drawAndFitAndSaveSet1D((TH1F**) htempTrueGuessPhi,(TF1**) ftempTrueGuessPhi, c0,"(phi2te-phi2t)*r2t*10",
+	drawAndFitAndSaveSet1D((TH1F**) htempTrueGuessPhi,(TF1**) ftempTrueGuessPhi, c0,"(phi30te-phi30t)*r30t*10",
 			       Form("abs(abs(0.5*log( (sqrt(pt*pt+pz*pz)+pz)/(sqrt(pt*pt+pz*pz)-pz))) -%f)<=%f",etabinmidpoint,etabinwidth/2.0),
 			       "hDeltaPhi_eta_1.0",";#Delta #phi [um]",50,-6,6);
 	drawFitParamAndSaveSet((TH1F**)htempResolution, c1, (TF1 **) ftempTrueGuessPhi, 2, "hResolutionSigmaPhi_high", ";pT [GeV];#phi res. at 30cm [mm]",0,2);
@@ -294,18 +305,18 @@ void kalman_uncertainty_nov14() {
 	//	TH1F *htempResolution[n_layouts];
 	etabinwidth=0.8;
 	etabinmidpoint=0.0;
-	drawAndFitAndSaveSet1D((TH1F**) htempTrueGuessZ,(TF1**) ftempTrueGuessZ, c0,"(z2te-z2t)*10",
+	drawAndFitAndSaveSet1D((TH1F**) htempTrueGuessZ,(TF1**) ftempTrueGuessZ, c0,"(z30te-z30t)*10",
 			       Form("abs(abs(0.5*log( (sqrt(pt*pt+pz*pz)+pz)/(sqrt(pt*pt+pz*pz)-pz))) -%f)<=%f",etabinmidpoint,etabinwidth/2.0),
 			       "hDeltaZ_eta_0",";#Delta #phi [um]",50,-6,6);
 	drawFitParamAndSaveSet((TH1F**)htempResolution, c1, (TF1 **) ftempTrueGuessZ, 2, "hResolutionSigmaZ_central", ";pT [GeV];z res. at 30cm [mm]",0,2);
 	etabinwidth=0.4;//since we have two separate regions that fill this now.
 	etabinmidpoint=0.4;
-	drawAndFitAndSaveSet1D((TH1F**) htempTrueGuessZ,(TF1**) ftempTrueGuessZ, c0,"(z2te-z2t)*10",
+	drawAndFitAndSaveSet1D((TH1F**) htempTrueGuessZ,(TF1**) ftempTrueGuessZ, c0,"(z30te-z30t)*10",
 			       Form("abs(abs(0.5*log( (sqrt(pt*pt+pz*pz)+pz)/(sqrt(pt*pt+pz*pz)-pz))) -%f)<=%f",etabinmidpoint,etabinwidth/2.0),
 			       "hDeltaZ_eta_0.6",";#Delta #phi [um]",50,-6,6);
 	drawFitParamAndSaveSet((TH1F**)htempResolution, c1, (TF1 **) ftempTrueGuessZ, 2, "hResolutionSigmaZ_mid", ";pT [GeV];z res. at 30cm [mm]",0,2);
 	etabinmidpoint=0.8;
-	drawAndFitAndSaveSet1D((TH1F**) htempTrueGuessZ,(TF1**) ftempTrueGuessZ, c0,"(z2te-z2t)*10",
+	drawAndFitAndSaveSet1D((TH1F**) htempTrueGuessZ,(TF1**) ftempTrueGuessZ, c0,"(z30te-z30t)*10",
 			       Form("abs(abs(0.5*log( (sqrt(pt*pt+pz*pz)+pz)/(sqrt(pt*pt+pz*pz)-pz))) -%f)<=%f",etabinmidpoint,etabinwidth/2.0),
 			       "hDeltaZ_eta_1.0",";#Delta #phi [um]",50,-6,6);
 	drawFitParamAndSaveSet((TH1F**)htempResolution, c1, (TF1 **) ftempTrueGuessZ, 2, "hResolutionSigmaZ_high", ";pT [GeV];z res. at 30cm [mm]",0,2);
