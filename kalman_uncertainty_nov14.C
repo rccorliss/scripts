@@ -220,12 +220,12 @@ void kalman_uncertainty_nov14() {
 	//compare phi of g4 and predicted position
 	TH1F *hTrueGuessPhi[n_datasets][n_layouts];
 	TF1 *fTrueGuessPhi[n_datasets][n_layouts];
-	  drawAndFitAndSaveSet1D((TH1F**) hTrueGuessPhi,(TF1**) fTrueGuessPhi, c0,"(phi30te-phi30t)*r30t*10","hDeltaPhi",";phi kalman-g4* [mm]",80,-8,8);
+	  drawAndFitAndSaveSet1D((TH1F**) hTrueGuessPhi,(TF1**) fTrueGuessPhi, c0,"(phi30te-phi30t)*r30t*10","ok30t&&ok30te","hDeltaPhi",";phi kalman-g4* [mm]",80,-8,8);
 
 	  //compare z of g4 and predicted position
 	TH1F *hTrueGuessZ[n_datasets][n_layouts];
 	TF1 *fTrueGuessZ[n_datasets][n_layouts];
-	  drawAndFitAndSaveSet1D((TH1F**) hTrueGuessZ,(TF1**) fTrueGuessZ, c0,"(z30te-z30t)*10","hDeltaZ",";z guess-g4 [mm]",50,-3,3);
+	  drawAndFitAndSaveSet1D((TH1F**) hTrueGuessZ,(TF1**) fTrueGuessZ, c0,"(z30te-z30t)*10","ok30t&&ok30te","hDeltaZ",";z guess-g4 [mm]",50,-3,3);
 
 	//compare phi of g4 and predicted position
 	TH1F *hTrueGuessPhig4[n_datasets][n_layouts];

@@ -20,7 +20,7 @@ const string sPHENIXbanner="#it{#bf{sPHENIX}} Simulation";
 const string basepath = "~/sphenix/data/auto/";
 //const string basepath = "/gpfs/mnt/gpfs04/sphenix/user/mitay/data/";
 
-const string outpath="112418recopt/";
+const string outpath="112818/";
 const string particlename="pi+";
 
 #define set2
@@ -144,8 +144,14 @@ void kalman_uncertainty_momspread() {
 n_sample_bins=26;
  sample_min=0.45;
  sample_max=3.05;
- sample_name="pt";	
+ sample_name="true_pti";	
 
+	TCanvas *c2=new TCanvas("c2","c2",800,800);
+
+	TH1F *hResolutionPhiCalc[n_layouts];
+	drawDataAndSaveSet((TH1F**)hResolutionPhiCalc, c2, "hResPhiCalc",";pT [GeV];#phi res. at 30cm [mm]",0,2);
+
+	return;
 	
 	//looking at regions we're hitting:
 	TH2F *hTruePhiZ[n_datasets][n_layouts];
@@ -529,9 +535,66 @@ void drawRMSAndSaveSet(TH1F **histout, TCanvas *c, TH1F **histin, string histnam
 
 
 
+void drawStaticAndSave(TH1F **histout, TCanvas *c, string histname, string axislabels, float minrange, float maxrange)
+{
+  const int ndata=8;
+   const float pt[8]={0.5,0.6,0.7,0.8,0.9,1.0,2.0,3.0};
+ const float a[8][8] = {
+	{0.16428, 0.13812, 0.12134, 0.10483, 0.09357, 0.08661, 0.05171, 0.03864},
+	{0.16853, 0.13518, 0.12134, 0.10648, 0.09618, 0.08767, 0.05439, 0.03985},
+	{0.12238, 0.10615, 0.08938, 0.08360, 0.07551, 0.06882, 0.04373, 0.03267},
+	{0.13065, 0.10902, 0.09148, 0.08199, 0.07423, 0.06986, 0.04110, 0.03386},
+	{0.11011, 0.09197, 0.07899, 0.06924, 0.06413, 0.05857, 0.03588, 0.02914},
+	{0.10204, 0.08638, 0.07285, 0.06924, 0.06288, 0.05554, 0.03848, 0.03031},
+	{0.10606, 0.09197, 0.07899, 0.06924, 0.06288, 0.05756, 0.03588, 0.02914},
+	{0.08627, 0.07269, 0.06282, 0.05684, 0.05303, 0.04661, 0.03074, 0.02564} };
+
+
+  
+  TLegend *leg;
+  c->cd();
+  int nsets=n_sample_bins;
+  int nsubs=n_layouts;
+  float setwidth=(sample_max-sample_min)/n_sample_bins;
+  leg = new TLegend(0.46,0.75,0.72,0.9);
+  leg->SetNColumns(2);
+    leg->AddEntry("",sPHENIXbanner.c_str(),"");
+    leg->AddEntry("","","");//for two columns, we need an additional spacer.
+
+    for (int i=0;i<nsubs;i++){
+      histout[i]=new TH1F((string(histname)+ string(layout[i])).c_str(),axislabels.c_str(),n_sample_bins,sample_min,sample_max);
+      histout[i]->SetLineColor(color[i]);
+      histout[i]->SetMarkerColor(color[i]);
+      //    histout[i]->SetLineWidth(2);
+      for (int j=0;j<ndata;j++){
+	int bin=histout[i]->Fill(pt[j],a[i][j]);
+      }
+
+    if (i==0){
+      histout[i]->GetYaxis()->SetRangeUser(minrange,maxrange);
+      histout[i]->Draw();
+    }else {
+      histout[i]->Draw("SAME");
+    }
+  }
+  for (int i=0;i<n_layouts;i++){
+    leg->AddEntry(histout[i],layout[i].c_str(),"l");
+  }
+  leg->Draw();
+	  
+  c->SaveAs((outpath+histname+"_"+outname+".pdf").c_str());
+  return;
+}
 
 
 
 
-
-
+a[8][8] = {
+	{0.16428, 0.13812, 0.12134, 0.10483, 0.09357, 0.08661, 0.05171, 0.03864},
+	{0.16853, 0.13518, 0.12134, 0.10648, 0.09618, 0.08767, 0.05439, 0.03985},
+	{0.12238, 0.10615, 0.08938, 0.08360, 0.07551, 0.06882, 0.04373, 0.03267},
+	{0.13065, 0.10902, 0.09148, 0.08199, 0.07423, 0.06986, 0.04110, 0.03386},
+	{0.11011, 0.09197, 0.07899, 0.06924, 0.06413, 0.05857, 0.03588, 0.02914},
+	{0.10204, 0.08638, 0.07285, 0.06924, 0.06288, 0.05554, 0.03848, 0.03031},
+	{0.10606, 0.09197, 0.07899, 0.06924, 0.06288, 0.05756, 0.03588, 0.02914},
+	{0.08627, 0.07269, 0.06282, 0.05684, 0.05303, 0.04661, 0.03074, 0.02564} };
