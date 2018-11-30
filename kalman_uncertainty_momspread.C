@@ -200,7 +200,7 @@ void kalman_uncertainty_momspread() {
 
 
 
-n_sample_bins=26;
+	n_sample_bins=1;//26;
  sample_min=0.45;
  sample_max=3.05;
  sample_name="true_pti";
@@ -217,9 +217,15 @@ n_sample_bins=26;
 	
 	//looking at thrown distribution that is in the record:
 	TH2F *hTrueMom2D[n_datasets][n_layouts];
-	drawAndSaveSet2D((TH2F**) hTrueMom2D,c0,"pti:pzi","ok30t","hTrueMom2D",";pz [GeV];pt [GeV]",50,-4,4,50,0,4);
+	drawAndSaveSet2D((TH2F**) hTrueMom2D,c0,"true_pti:true_pzi","ok30t","hTrueMom2D",";pz [GeV];pt [GeV]",50,-5,5,50,0,4);
+	TH2F *hTrueMomVsEta[n_datasets][n_layouts];
+	drawAndSaveSet2D((TH2F**) hTrueMomVsEta,c0,"sqrt(true_pti*true_pti+true_pzi*true_pzi):"+ETA,"ok30t","hTrueMomVsEta",";#eta [#];p [GeV]",50,-1.5,1.5,50,0,6);
+	TH2F *hTruePtVsEta[n_datasets][n_layouts];
+	drawAndSaveSet2D((TH2F**) hTruePtVsEta,c0,"true_pti:"+ETA,"ok30t","hTruePtVsEta",";#eta [#];pt [GeV]",50,-1.5,1.5,50,0,6);
+	TH2F *hTruePtVsEtaCut[n_datasets][n_layouts];
+	drawAndSaveSet2D((TH2F**) hTruePtVsEtaCut,c0,"true_pti:"+ETA,common_cut+"&&ok30t","hTruePtVsEtaCut",";#eta [#];pt [GeV]",50,-1.5,1.5,50,0,6);
 	TH2F *hTrueMom2DCut[n_datasets][n_layouts];
-	drawAndSaveSet2D((TH2F**) hTrueMom2DCut,c0,"pti:pzi",common_cut+"&&ok30t","hTrueMom2DCut",";pz [GeV];pt [GeV]",50,-4,4,50,0,4);
+	drawAndSaveSet2D((TH2F**) hTrueMom2DCut,c0,"true_pti:true_pzi",common_cut+"&&ok30t","hTrueMom2DCut",";pz [GeV];pt [GeV]",50,-4,4,50,0,4);
 
 
 	//looking at regions we're hitting:
@@ -389,6 +395,12 @@ void drawAndSaveSet2D(TH2F **histout, TCanvas *c, string drawcommand, string wei
       if (!isZombie[j])
 	ntuple[j]->Draw((drawcommand+">>"+histname + to_string(i)+ layout[j]).c_str(),Form("(%s)*(%f<%s && %s<%f)",weightcommand.c_str(),setlow,sample_name.c_str(),sample_name.c_str(),sethigh));
       histout[i*nsubs+j]->Draw("colz");
+      TLegend *leg = new TLegend(0.50,0.8,0.90,0.9);
+      leg->SetNColumns(1);
+      leg->SetTextAlign(31);
+      leg->AddEntry("",Form("#bf{%s}",layout[i].c_str()),"");
+      leg->AddEntry("",Form("(%2.2f<%s<%2.2f)",setlow,sample_name.c_str(),sethigh),"");
+      leg->Draw();
     }
     c->SaveAs((outpath+histname+"_"+outname+"_"+to_string(i)+".pdf").c_str());
 
@@ -657,4 +669,7 @@ void drawDataAndSaveSet(TH1F **histout, TCanvas *c, string histname, string axis
   c->SaveAs((outpath+histname+".pdf").c_str());
   return;
 }
+
+
+
 
