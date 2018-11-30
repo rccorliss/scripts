@@ -20,21 +20,23 @@ const string sPHENIXbanner="#it{#bf{sPHENIX}} Simulation";
 const string basepath = "~/sphenix/data/auto/";
 //const string basepath = "/gpfs/mnt/gpfs04/sphenix/user/mitay/data/";
 
-const string outpath="112818/";
+const string outpath="tpc112818/";
 const string particlename="pi+";
 
-#define set2
+#define set1
 
 #ifdef set1
-const string studypath="mom_spread_112418";//doubles as a naming convention?
+const string studypath="tpc_hack_large_unc";//doubles as a naming convention?
+//const string studypath="mom_spread_112418";//doubles as a naming convention?
 const string outname="spread";
-const int n_layouts = 8;
+const int n_layouts = 7;
 const string particle="pi+";
-const string layout[n_layouts]={"000p","00pp","00zp","0ppp","0pzp","ppzp","zppp","00pp_out"};
-const string setname[n_layouts]={"000p","00pp","00zp","0ppp","0pzp","ppzp","zppp","00pp_out"};
-const int color[n_layouts]={9,4,7,8,5,42,2,6};
+const string layout[n_layouts]={"000p","00pp"/*,"00zp"*/,"0ppp","0pzp","ppzp","zppp","00pp_out"};
+const string setname[n_layouts]={"000p","00pp"/*,"00zp"*/,"0ppp","0pzp","ppzp","zppp","00pp_out"};
+const int color[n_layouts]={9,4,7,8,5,42,2};//,6};
 const string fileprefix="";
-const string filemiddle="_pt0.5-3.0GeV_";
+//const string filemiddle="_pt0.5-3.0GeV_";
+const string filemiddle="_tpc_normal_";
 const string filesuffix=".root_g4kalman_eval.root";
 #endif
 
@@ -50,6 +52,46 @@ const string fileprefix="";
 const string filemiddle="_pt_discrete_";
 const string filesuffix=".root_g4kalman_eval.root";
 #endif
+
+#ifdef set3
+const string studypath="mom_spread_112418";//doubles as a naming convention?
+const string outname="1-2-3-4";
+const int n_layouts = 4;
+const string particle="pi+";
+const string layout[n_layouts]={"000p","00pp","0ppp","zppp"};
+const string setname[n_layouts]={"000p","00pp","0ppp","zppp"};
+const int color[n_layouts]={9,7,8,2};
+const string fileprefix="";
+const string filemiddle="_pt0.5-3.0GeV_";
+const string filesuffix=".root_g4kalman_eval.root";
+#endif
+
+#ifdef set4
+const string studypath="mom_spread_112418";//doubles as a naming convention?
+const string outname="pp_zp_ppout";
+const int n_layouts = 3;
+const string particle="pi+";
+const string layout[n_layouts]={"00pp","00zp","00pp_out"};
+const string setname[n_layouts]={"00pp","00zp","00pp_out"};
+const int color[n_layouts]={7,8,2};
+const string fileprefix="";
+const string filemiddle="_pt0.5-3.0GeV_";
+const string filesuffix=".root_g4kalman_eval.root";
+#endif
+
+#ifdef set5
+const string studypath="mom_spread_112418";//doubles as a naming convention?
+const string outname="ppzp_zppp";
+const int n_layouts = 2;
+const string particle="pi+";
+const string layout[n_layouts]={"ppzp","zppp"};
+const string setname[n_layouts]={"ppzp","zppp"};
+const int color[n_layouts]={7,8};
+const string fileprefix="";
+const string filemiddle="_pt0.5-3.0GeV_";
+const string filesuffix=".root_g4kalman_eval.root";
+#endif
+
 #ifdef set2_112118
 const string studypath="mom_spread_112118";//doubles as a naming convention?
 const string outname="all_7";
@@ -97,7 +139,7 @@ void drawAndFitAndSaveSet1D(TH1F **histout,TF1 **fitout, TCanvas *c, string draw
 void drawFitParamAndSaveSet(TH1F **histout, TCanvas *c, TF1 **fit, int param, string histname, string axislabels, float minrange, float maxrange);
 void drawFitErrorAndSaveSet(TH1F **histout, TCanvas *c, TF1 **fit, int param, string histname, string axislabels, float minrange, float maxrange);
 void drawRMSAndSaveSet(TH1F **histout, TCanvas *c, TH1F **histin, string histname, string axislabels, float minrange, float maxrange);
-
+void drawDataAndSaveSet(TH1F **histout, TCanvas *c, string histname, string axislabels, float minrange, float maxrange);
 
 void kalman_uncertainty_momspread() {
 //rcc says: don't need to do this just to read basic structures:  gSystem->Load("libg4hough.so");
@@ -105,7 +147,7 @@ void kalman_uncertainty_momspread() {
   SetsPhenixStyle();
 
   const string path=basepath+studypath+"/";
-
+  TTree *losthit=nullptr;
   //open all the files we need.  first index is subpath, second index is layout.
   for (int i = 0; i < n_layouts; i++){
     ntuple[i]=nullptr;
@@ -114,11 +156,28 @@ void kalman_uncertainty_momspread() {
     isZombie[i]=fin[i]->IsZombie();
     if (isZombie[i]) continue; //skip them if the file is broken.
     fin[i]->GetObject("kalman_eval",ntuple[i]);
+    if (!losthit) fin[i]->GetObject("lost_hit_eval",losthit);
   }
 
 
 	//start drawing things:
-	
+
+
+  TCanvas *c=new TCanvas("c","c",400,400);
+
+    TLegend *leg;
+    //c->cd();
+    
+    leg = new TLegend(0.20,0.20,0.480,0.3);
+    leg->SetNColumns(2);
+    leg->AddEntry("",sPHENIXbanner.c_str(),"");
+    //leg->AddEntry("","","");//for two columns, we need an additional spacer.
+    TH2F *hhits=new TH2F("hhits","hhits;x [cm];y [cm]",300,-25,25,300,-25,25);
+    losthit->Draw("x:y>>hhits","r<25");
+    hhits->Draw("colz");
+    leg->Draw();
+    c->SaveAs((outpath+"KalmanHitsUsed.pdf").c_str());
+
 	//create a canvas to draw all the 2D plots:
 	//	TCanvas *c0=new TCanvas("c0","c0",800,600);
 	//c0->Divide(2,1);
@@ -144,27 +203,38 @@ void kalman_uncertainty_momspread() {
 n_sample_bins=26;
  sample_min=0.45;
  sample_max=3.05;
- sample_name="true_pti";	
+ sample_name="true_pti";
+ const string ETA="0.5*log( (sqrt(pti*pti+pzi*pzi)+pzi)/(sqrt(pti*pti+pzi*pzi)-pzi))";
+ string common_cut="abs("+ETA+")<=0.8"; //|eta|<0.8 cut.
 
 	TCanvas *c2=new TCanvas("c2","c2",800,800);
 
+
+	
 	TH1F *hResolutionPhiCalc[n_layouts];
 	drawDataAndSaveSet((TH1F**)hResolutionPhiCalc, c2, "hResPhiCalc",";pT [GeV];#phi res. at 30cm [mm]",0,2);
 
-	return;
 	
+	//looking at thrown distribution that is in the record:
+	TH2F *hTrueMom2D[n_datasets][n_layouts];
+	drawAndSaveSet2D((TH2F**) hTrueMom2D,c0,"pti:pzi","ok30t","hTrueMom2D",";pz [GeV];pt [GeV]",50,-4,4,50,0,4);
+	TH2F *hTrueMom2DCut[n_datasets][n_layouts];
+	drawAndSaveSet2D((TH2F**) hTrueMom2DCut,c0,"pti:pzi",common_cut+"&&ok30t","hTrueMom2DCut",";pz [GeV];pt [GeV]",50,-4,4,50,0,4);
+
+
 	//looking at regions we're hitting:
 	TH2F *hTruePhiZ[n_datasets][n_layouts];
 	drawAndSaveSet2D((TH2F**) hTruePhiZ,c0,"z30t:phi30t","ok30t","hTruePhiZ",";phi g4 [rad.];z g4[cm]",50,-4,4,50,-100,100);
 
+	return;
 	//compare true and kalman extrapolated position
 	TH2F *hTrueGuessPhiZ[n_datasets][n_layouts];
-	drawAndSaveSet2D((TH2F**) hTrueGuessPhiZ,c0,"(z30te-z30t)*10:(phi30te-phi30t)*r30t*10","ok30t&&ok30te","hDelta2D",";phi guess-g4* [mm];z guess-g4[mm]",50,-3,3,50,-15,15);
+	drawAndSaveSet2D((TH2F**) hTrueGuessPhiZ,c0,"(z30te-z30t)*10:(phi30te-phi30t)*r30t*10",common_cut+"&&ok30t&&ok30te","hDelta2D",";phi guess-g4* [mm];z guess-g4[mm]",50,-3,3,50,-15,15);
 
 		//compare true and kalman extrapolated position
 
        	TH2F *hG4vsClusterTrack2D[n_datasets][n_layouts];
-	drawAndSaveSet2D((TH2F**) hG4vsClusterTrack2D,c0,"(z30te-g4_z30te)*10:(phi30te-g4_phi30te)*r30te*10","ok30te&&g4_ok30te","hG4vsClusterTrack2D",";phi cltrack-g4track [mm];z cltrack-g4track[mm]",50,-3,3,50,-15,15);
+	drawAndSaveSet2D((TH2F**) hG4vsClusterTrack2D,c0,"(z30te-g4_z30te)*10:(phi30te-g4_phi30te)*r30te*10",common_cut+"&&ok30te&&g4_ok30te","hG4vsClusterTrack2D",";phi cltrack-g4track [mm];z cltrack-g4track[mm]",50,-3,3,50,-15,15);
 
 	TH2F *hG4vsTruth2D[n_datasets][n_layouts];
 	drawAndSaveSet2D((TH2F**) hG4vsClusterTrack2D,c0,"(g4_z30t-g4_z30te)*10:(g4_phi30t-g4_phi30te)*g4_r30t*10","g4_ok30t&&g4_ok30te","hG4vsTruth2D",";phi truth-g4track [mm];z truth-g4track[mm]",50,-3,3,50,-15,15);
@@ -176,12 +246,12 @@ n_sample_bins=26;
 	//compare phi of g4 and predicted position
 	TH1F *hTrueGuessPhi[n_datasets][n_layouts];
 	TF1 *fTrueGuessPhi[n_datasets][n_layouts];
-	  drawAndFitAndSaveSet1D((TH1F**) hTrueGuessPhi,(TF1**) fTrueGuessPhi, c0,"(phi30te-phi30t)*r30t*10","ok30t&&ok30te","hDeltaPhi",";phi kalman-g4* [mm]",80,-8,8);
+	  drawAndFitAndSaveSet1D((TH1F**) hTrueGuessPhi,(TF1**) fTrueGuessPhi, c0,"(phi30te-phi30t)*r30t*10",common_cut+"&&ok30t&&ok30te","hDeltaPhi",";phi kalman-g4* [mm]",80,-8,8);
 
 	  //compare z of g4 and predicted position
 	TH1F *hTrueGuessZ[n_datasets][n_layouts];
 	TF1 *fTrueGuessZ[n_datasets][n_layouts];
-	  drawAndFitAndSaveSet1D((TH1F**) hTrueGuessZ,(TF1**) fTrueGuessZ, c0,"(z30te-z30t)*10","ok30t&&ok30te","hDeltaZ",";z guess-g4 [mm]",50,-4,4);
+	  drawAndFitAndSaveSet1D((TH1F**) hTrueGuessZ,(TF1**) fTrueGuessZ, c0,"(z30te-z30t)*10",common_cut+"&&ok30t&&ok30te","hDeltaZ",";z guess-g4 [mm]",50,-4,4);
 
 
 	//the next two don't work, but the previous two do...?  g4_ok30t is not setting correctly.
@@ -535,19 +605,19 @@ void drawRMSAndSaveSet(TH1F **histout, TCanvas *c, TH1F **histin, string histnam
 
 
 
-void drawStaticAndSave(TH1F **histout, TCanvas *c, string histname, string axislabels, float minrange, float maxrange)
+void drawDataAndSaveSet(TH1F **histout, TCanvas *c, string histname, string axislabels, float minrange, float maxrange)
 {
   const int ndata=8;
    const float pt[8]={0.5,0.6,0.7,0.8,0.9,1.0,2.0,3.0};
  const float a[8][8] = {
+   {0.08627, 0.07269, 0.06282, 0.05684, 0.05303, 0.04661, 0.03074, 0.02564},
 	{0.16428, 0.13812, 0.12134, 0.10483, 0.09357, 0.08661, 0.05171, 0.03864},
 	{0.16853, 0.13518, 0.12134, 0.10648, 0.09618, 0.08767, 0.05439, 0.03985},
 	{0.12238, 0.10615, 0.08938, 0.08360, 0.07551, 0.06882, 0.04373, 0.03267},
 	{0.13065, 0.10902, 0.09148, 0.08199, 0.07423, 0.06986, 0.04110, 0.03386},
 	{0.11011, 0.09197, 0.07899, 0.06924, 0.06413, 0.05857, 0.03588, 0.02914},
 	{0.10204, 0.08638, 0.07285, 0.06924, 0.06288, 0.05554, 0.03848, 0.03031},
-	{0.10606, 0.09197, 0.07899, 0.06924, 0.06288, 0.05756, 0.03588, 0.02914},
-	{0.08627, 0.07269, 0.06282, 0.05684, 0.05303, 0.04661, 0.03074, 0.02564} };
+   {0.10606, 0.09197, 0.07899, 0.06924, 0.06288, 0.05756, 0.03588, 0.02914}};
 
 
   
@@ -558,7 +628,7 @@ void drawStaticAndSave(TH1F **histout, TCanvas *c, string histname, string axisl
   float setwidth=(sample_max-sample_min)/n_sample_bins;
   leg = new TLegend(0.46,0.75,0.72,0.9);
   leg->SetNColumns(2);
-    leg->AddEntry("",sPHENIXbanner.c_str(),"");
+    leg->AddEntry("","back-of-the-envelope","");
     leg->AddEntry("","","");//for two columns, we need an additional spacer.
 
     for (int i=0;i<nsubs;i++){
@@ -567,7 +637,9 @@ void drawStaticAndSave(TH1F **histout, TCanvas *c, string histname, string axisl
       histout[i]->SetMarkerColor(color[i]);
       //    histout[i]->SetLineWidth(2);
       for (int j=0;j<ndata;j++){
-	int bin=histout[i]->Fill(pt[j],a[i][j]);
+	int bin=histout[i]->Fill(pt[j],10*a[7-i][j]);
+	histout[i]->SetBinError(bin,a[7-i][j]*0.0001);
+
       }
 
     if (i==0){
@@ -582,19 +654,7 @@ void drawStaticAndSave(TH1F **histout, TCanvas *c, string histname, string axisl
   }
   leg->Draw();
 	  
-  c->SaveAs((outpath+histname+"_"+outname+".pdf").c_str());
+  c->SaveAs((outpath+histname+".pdf").c_str());
   return;
 }
 
-
-
-
-a[8][8] = {
-	{0.16428, 0.13812, 0.12134, 0.10483, 0.09357, 0.08661, 0.05171, 0.03864},
-	{0.16853, 0.13518, 0.12134, 0.10648, 0.09618, 0.08767, 0.05439, 0.03985},
-	{0.12238, 0.10615, 0.08938, 0.08360, 0.07551, 0.06882, 0.04373, 0.03267},
-	{0.13065, 0.10902, 0.09148, 0.08199, 0.07423, 0.06986, 0.04110, 0.03386},
-	{0.11011, 0.09197, 0.07899, 0.06924, 0.06413, 0.05857, 0.03588, 0.02914},
-	{0.10204, 0.08638, 0.07285, 0.06924, 0.06288, 0.05554, 0.03848, 0.03031},
-	{0.10606, 0.09197, 0.07899, 0.06924, 0.06288, 0.05756, 0.03588, 0.02914},
-	{0.08627, 0.07269, 0.06282, 0.05684, 0.05303, 0.04661, 0.03074, 0.02564} };
